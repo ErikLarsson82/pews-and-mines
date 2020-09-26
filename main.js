@@ -495,7 +495,7 @@ function gameloop() {
 
     const MAX_ENEMIES = 5
 
-    if (spawnCounter > 100 && waveCounter < MAX_ENEMIES) {
+    if (spawnCounter > 100 && waveCounter < MAX_ENEMIES && hasInput) {
     	waveCounter++
     	spawnCounter = 0
 
