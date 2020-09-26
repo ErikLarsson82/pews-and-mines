@@ -1,7 +1,8 @@
 
-let enemyHullTexture, enemyShieldTexture, pewTexture, mineTexture, mineTrigTexture, blastHullTexture, blastShieldTexture,
+let pewTexture, mineTexture, mineTrigTexture, blastHullTexture, blastShieldTexture,
 	p1Texture, p1Sprite, p1up, p1down, p1left, p1right, p1shoot, p1cooldown,
 	p2Texture, p2Sprite, p2up, p2down, p2left, p2right, p2shoot, p2cooldown,
+    enemy1ShieldTexture, enemy1HullTexture, enemy2ShieldTexture, enemy2HullTexture, enemy3HullTexture,
 	counter, pews, mines, enemies, ghosts, enemyKills, enemyKillText, highscoreText, playerDeaths, playerDeathText, spawnCounter, waveCounter, hasInput, logoContainer
 
 const RENDER_SIZE = 256
@@ -23,12 +24,15 @@ const renderer = PIXI.autoDetectRenderer(RENDER_SIZE, RENDER_SIZE, config)
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST // Default pixel-scaling
 
 renderer.view.style.imageRendering = 'pixelated'
-renderer.backgroundColor = 0x222034
+renderer.backgroundColor = 0x171717
 
 PIXI.loader.add('assets/player-1.png')
 PIXI.loader.add('assets/player-2.png')
-PIXI.loader.add('assets/enemy-hull.png')
-PIXI.loader.add('assets/enemy-shield.png')
+PIXI.loader.add('assets/enemy1-shield.png')
+PIXI.loader.add('assets/enemy1-hull.png')
+PIXI.loader.add('assets/enemy2-shield.png')
+PIXI.loader.add('assets/enemy2-hull.png')
+PIXI.loader.add('assets/enemy3-hull.png')
 PIXI.loader.add('assets/pew.png')
 PIXI.loader.add('assets/mine.png')
 PIXI.loader.add('assets/mine-trig.png')
@@ -63,8 +67,14 @@ function startGame() {
 	p1Texture = PIXI.Texture.fromImage('assets/player-1.png')
 	p2Texture = PIXI.Texture.fromImage('assets/player-2.png')
 
-	enemyHullTexture = PIXI.Texture.fromImage('assets/enemy-hull.png')
-	enemyShieldTexture = PIXI.Texture.fromImage('assets/enemy-shield.png')
+	enemy1ShieldTexture = PIXI.Texture.fromImage('assets/enemy1-shield.png')
+    enemy1HullTexture = PIXI.Texture.fromImage('assets/enemy1-hull.png')
+
+    enemy2ShieldTexture = PIXI.Texture.fromImage('assets/enemy2-shield.png')
+    enemy2HullTexture = PIXI.Texture.fromImage('assets/enemy2-hull.png')
+
+    enemy3HullTexture = PIXI.Texture.fromImage('assets/enemy3-hull.png')
+    
 	pewTexture = PIXI.Texture.fromImage('assets/pew.png')
 	mineTexture = PIXI.Texture.fromImage('assets/mine.png')
 	mineTrigTexture = PIXI.Texture.fromImage('assets/mine-trig.png')
@@ -373,7 +383,16 @@ function gameloop() {
     	if (e.prefixHull <= 0) {
     		enemyKills++
 
-            const ghostSprite = new PIXI.Sprite(enemyHullTexture)
+            const ghostSprite = new PIXI.Sprite()
+
+            if (e.prefixType === 'horizontal') {
+                ghostSprite.texture = enemy1HullTexture
+            } else if (e.prefixType === 'sinus') {
+                ghostSprite.texture = enemy2HullTexture
+            } else if (e.prefixType === 'mini-sinus') {
+                ghostSprite.texture = enemy3HullTexture
+            }
+            
             ghostSprite.prefixTimer = 40
             ghostSprite.anchor.set(0.5, 0.5)
             ghostSprite.position.x = e.position.x
@@ -419,9 +438,19 @@ function gameloop() {
 		})
 
     	if (e.prefixShield > 0) {
-    		e.texture = enemyShieldTexture
+            if (e.prefixType === 'horizontal') {
+                e.texture = enemy1ShieldTexture    
+            } else if (e.prefixType === 'sinus') {
+                e.texture = enemy2ShieldTexture    
+            }
     	} else {
-    		e.texture = enemyHullTexture
+            if (e.prefixType === 'horizontal') {
+    		  e.texture = enemy1HullTexture
+            } else if (e.prefixType === 'sinus') {
+              e.texture = enemy2HullTexture
+            } else if (e.prefixType === 'mini-sinus') {
+              e.texture = enemy3HullTexture
+            }
     	}
 
     	if (e.prefixType === 'horizontal') {
@@ -474,8 +503,7 @@ function gameloop() {
         g.prefixTimer--
 
         g.position.x += Math.sin(counter * 100)
-        //g.position.y += Math.sin(g.prefixTimer * 10000)
-
+        
         if (g.prefixTimer <= 0) {
             g.prefixDestroy = true
             stage.removeChild(g)
@@ -499,7 +527,7 @@ function gameloop() {
     	waveCounter++
     	spawnCounter = 0
 
-    	const enemy = new PIXI.Sprite(enemyShieldTexture)
+    	const enemy = new PIXI.Sprite()
     	enemy.anchor.set(0.5, 0.5)
 
     	const rand = Math.random()
