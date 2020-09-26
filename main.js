@@ -2,7 +2,7 @@
 let enemyHullTexture, enemyShieldTexture, pewTexture, mineTexture, mineTrigTexture, blastHullTexture, blastShieldTexture,
 	p1Texture, p1Sprite, p1up, p1down, p1left, p1right, p1shoot, p1cooldown,
 	p2Texture, p2Sprite, p2up, p2down, p2left, p2right, p2shoot, p2cooldown,
-	counter, pews, mines, enemies, enemyKills, enemyKillText, playerDeaths, playerDeathText, spawnCounter, waveCounter
+	counter, pews, mines, enemies, enemyKills, enemyKillText, highscoreText, playerDeaths, playerDeathText, spawnCounter, waveCounter
 
 const RENDER_SIZE = 256
 
@@ -49,6 +49,8 @@ function startGame() {
 
     waveCounter = 0
 
+    highscore = 0
+
     pews = []
     mines = []
     blasts = []
@@ -71,6 +73,11 @@ function startGame() {
     topBorder.drawRect(0, 0, RENDER_SIZE, 18)
     stage.addChild(topBorder)
 
+    const topBorderIndent = new PIXI.Graphics()
+    topBorderIndent.beginFill(0x000000)
+    topBorderIndent.drawRect(40, 18, RENDER_SIZE - 80, 8)
+    stage.addChild(topBorderIndent)
+
     playerDeathText = new PIXI.Text(playerDeaths, {fontFamily : 'Press Start 2P', fontSize: 16, fill : 0xff1010})
     playerDeathText.position.x = 2
     playerDeathText.position.y = 2
@@ -81,6 +88,12 @@ function startGame() {
     enemyKillText.position.x = RENDER_SIZE
     enemyKillText.position.y = 2
     stage.addChild(enemyKillText)
+
+    highscoreText = new PIXI.Text(highscore, {fontFamily : 'Press Start 2P', fontSize: 24, fill : 0xffffff})
+    highscoreText.anchor.set(0.5, 0)
+    highscoreText.position.x = RENDER_SIZE / 2
+    highscoreText.position.y = 2
+    stage.addChild(highscoreText)
 
 	p1Sprite = new PIXI.Sprite(p1Texture)
     p1Sprite.prefixGodmode = 120
@@ -431,6 +444,9 @@ function gameloop() {
     	waveCounter = 0
     }
 
+    highscore = playerDeaths === 0 ? enemyKills * 1000 : Math.floor(enemyKills / playerDeaths * 1000)
+    highscoreText.text = highscore
+
     renderer.render(stage)
 }
 
@@ -453,6 +469,7 @@ window.addEventListener('keydown', e => {
 
 	if (e.keyCode === 39) {
 		p2right = true
+        enemyKills++
 	}
 	if (e.keyCode === 37) {
 		p2left = true
