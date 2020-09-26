@@ -1,9 +1,9 @@
 
-let pewTexture, mineTexture, mineTrigTexture, blastHullTexture, blastShieldTexture,
+let pewTexture, pewPuffTexture, mineTexture, mineTrigTexture, blastHullTexture, blastShieldTexture,
 	p1Texture, p1Sprite, p1up, p1down, p1left, p1right, p1shoot, p1cooldown,
 	p2Texture, p2Sprite, p2up, p2down, p2left, p2right, p2shoot, p2cooldown,
     enemy1ShieldTexture, enemy1HullTexture, enemy2ShieldTexture, enemy2HullTexture, enemy3HullTexture,
-	counter, pews, mines, enemies, ghosts, enemyKills, enemyKillText, highscoreText, playerDeaths, playerDeathText, spawnCounter, waveCounter, hasInput, logoContainer
+	counter, pews, pewPuffs, mines, enemies, ghosts, enemyKills, enemyKillText, highscoreText, playerDeaths, playerDeathText, spawnCounter, waveCounter, hasInput, logoContainer
 
 const RENDER_SIZE = 256
 
@@ -24,7 +24,7 @@ const renderer = PIXI.autoDetectRenderer(RENDER_SIZE, RENDER_SIZE, config)
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST // Default pixel-scaling
 
 renderer.view.style.imageRendering = 'pixelated'
-renderer.backgroundColor = 0x171717
+renderer.backgroundColor = 0x181425
 
 PIXI.loader.add('assets/player-1.png')
 PIXI.loader.add('assets/player-2.png')
@@ -34,6 +34,7 @@ PIXI.loader.add('assets/enemy2-shield.png')
 PIXI.loader.add('assets/enemy2-hull.png')
 PIXI.loader.add('assets/enemy3-hull.png')
 PIXI.loader.add('assets/pew.png')
+PIXI.loader.add('assets/pew-puff.png')
 PIXI.loader.add('assets/mine.png')
 PIXI.loader.add('assets/mine-trig.png')
 PIXI.loader.add('assets/blast-hull.png')
@@ -58,6 +59,7 @@ function startGame() {
     hasInput = false
 
     pews = []
+    pewPuffs = []
     mines = []
     blasts = []
     enemies = []
@@ -76,6 +78,7 @@ function startGame() {
     enemy3HullTexture = PIXI.Texture.fromImage('assets/enemy3-hull.png')
     
 	pewTexture = PIXI.Texture.fromImage('assets/pew.png')
+    pewPuffTexture = PIXI.Texture.fromImage('assets/pew-puff.png')
 	mineTexture = PIXI.Texture.fromImage('assets/mine.png')
 	mineTrigTexture = PIXI.Texture.fromImage('assets/mine-trig.png')
 	blastHullTexture = PIXI.Texture.fromImage('assets/blast-hull.png')
@@ -284,9 +287,26 @@ function gameloop() {
 		})
 
     	if (pewHit || p.position.x > RENDER_SIZE) {
+            const pewPuff = new PIXI.Sprite(pewPuffTexture)
+            pewPuff.prefixTimer = 5
+            pewPuff.anchor.set(0.5, 0.5)
+            pewPuff.position.x = p.position.x
+            pewPuff.position.y = p.position.y
+            pewPuffs.push(pewPuff)
+            stage.addChild(pewPuff)
+    
     		p.prefixDestroy = true
     		stage.removeChild(p)
     	} 
+    })
+
+    pewPuffs.forEach(pp => {
+        pp.prefixTimer--
+
+        if (pp.prefixTimer <= 0) {
+            pp.prefixDestroy = true
+            stage.removeChild(pp)
+        }
     })
 
     mines.forEach(m => {
@@ -392,7 +412,7 @@ function gameloop() {
             } else if (e.prefixType === 'mini-sinus') {
                 ghostSprite.texture = enemy3HullTexture
             }
-            
+
             ghostSprite.prefixTimer = 40
             ghostSprite.anchor.set(0.5, 0.5)
             ghostSprite.position.x = e.position.x
@@ -511,6 +531,7 @@ function gameloop() {
     })
 
     pews = pews.filter(p => !p.prefixDestroy)
+    pewPuffs = pewPuffs.filter(p => !p.prefixDestroy)
     enemies = enemies.filter(p => !p.prefixDestroy)
     mines = mines.filter(p => !p.prefixDestroy)
     blasts = blasts.filter(p => !p.prefixDestroy)
