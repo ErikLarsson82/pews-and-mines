@@ -3,7 +3,9 @@ let pewTexture, pewPuffTexture, mineTexture, mineTrigTexture, blastHullTexture, 
 	p1Texture, p1Sprite, p1up, p1down, p1left, p1right, p1shoot, p1cooldown,
 	p2Texture, p2Sprite, p2up, p2down, p2left, p2right, p2shoot, p2cooldown,
     enemy1ShieldTexture, enemy1HullTexture, enemy2ShieldTexture, enemy2HullTexture, enemy3HullTexture,
-	counter, pews, pewPuffs, mines, enemies, ghosts, enemyKills, enemyKillText, highscoreText, playerDeaths, playerDeathText, spawnCounter, waveCounter, hasInput, logoContainer, stars
+	counter, pews, pewPuffs, mines, enemies, ghosts, enemyKills, enemyKillText, highscoreText,
+    playerDeaths, playerDeathText, spawnCounter, hasInput, logoContainer, stars,
+    waveCounter, wave, waveText
 
 const RENDER_SIZE = 256
 
@@ -56,6 +58,8 @@ function startGame() {
 
     highscore = 0
 
+    wave = 0
+
     hasInput = false
 
     pews = []
@@ -103,6 +107,12 @@ function startGame() {
     topBorderIndent.beginFill(0x000000)
     topBorderIndent.drawRect(40, 18, RENDER_SIZE - 80, 8)
     stage.addChild(topBorderIndent)
+
+    waveText = new PIXI.Text('', {fontFamily : 'Press Start 2P', fontSize: 30, fill : 0x0000ff})
+    waveText.prefixTimer = 180
+    waveText.position.x = 42
+    waveText.position.y = 30
+    stage.addChild(waveText)
 
     logoContainer = new PIXI.Container()
     logoContainer.position.x = (RENDER_SIZE - 214) / 2
@@ -562,6 +572,14 @@ function gameloop() {
 
     const MAX_ENEMIES = 5
 
+    if (waveText.prefixTimer > 0 && hasInput) {
+        waveText.prefixTimer--
+        waveText.text = 'WAVE ' + (wave + 1)
+        waveText.visible = true
+    } else {
+        waveText.visible = false
+    }
+
     if (spawnCounter > 100 && waveCounter < MAX_ENEMIES && hasInput) {
     	waveCounter++
     	spawnCounter = 0
@@ -592,6 +610,8 @@ function gameloop() {
 
     if (waveCounter >= MAX_ENEMIES && enemies.length === 0) {
     	waveCounter = 0
+        wave++
+        waveText.prefixTimer = 180
     }
 
     highscore = playerDeaths === 0 ? enemyKills * 1000 : Math.floor(enemyKills / playerDeaths * 1000)
