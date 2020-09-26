@@ -329,6 +329,32 @@ function gameloop() {
     		e.position.x = e.position.x - 0.2
     		e.position.y = e.position.y + Math.sin(counter * 10) * 0.7
     	}
+
+    	if (e.position.y > 220) {
+    		e.position.y = 220
+    	}
+
+    	if (e.position.y < 30) {
+    		e.position.y = 30
+    	}
+    })
+
+    players.forEach(p => {
+        if (p.position.y > 230) {
+            p.position.y = 230
+        }
+
+        if (p.position.y < 30) {
+            p.position.y = 30
+        }
+
+        if (p.position.x > 240) {
+            p.position.x = 240
+        }
+
+        if (p.position.x < 15) {
+            p.position.x = 15
+        }
     })
 
     pews = pews.filter(p => !p.prefixDestroy)
