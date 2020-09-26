@@ -571,11 +571,11 @@ function gameloop() {
     	const rand = Math.random()
     	if (rand < 0.3) {
 	    	enemy.prefixType = 'horizontal'
-	    	enemy.prefixShield = 40
+	    	enemy.prefixShield = 20
 	    	enemy.prefixHull = 40
 	    } else if (rand < 0.6) {
 	    	enemy.prefixType = 'sinus'
-	    	enemy.prefixShield = 40
+	    	enemy.prefixShield = 5
 	    	enemy.prefixHull = 40
 	    } else {
 	    	enemy.prefixType = 'mini-sinus'
@@ -595,7 +595,7 @@ function gameloop() {
         waveText.prefixTimer = 180
     }
 
-    highscore = playerDeaths === 0 ? enemyKills * 1000 : Math.floor(enemyKills / playerDeaths * 1000)
+    highscore = enemyKills * 1000 - playerDeaths * 5000
     highscoreText.text = highscore
 
     if (hasInput) {
