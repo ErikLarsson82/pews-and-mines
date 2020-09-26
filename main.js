@@ -66,6 +66,22 @@ function startGame() {
 	blastHullTexture = PIXI.Texture.fromImage('assets/blast-hull.png')
 	blastShieldTexture = PIXI.Texture.fromImage('assets/blast-shield.png')
 	
+    const topBorder = new PIXI.Graphics()
+    topBorder.beginFill(0x000000)
+    topBorder.drawRect(0, 0, RENDER_SIZE, 18)
+    stage.addChild(topBorder)
+
+    playerDeathText = new PIXI.Text(playerDeaths, {fontFamily : 'Press Start 2P', fontSize: 16, fill : 0xff1010})
+    playerDeathText.position.x = 2
+    playerDeathText.position.y = 2
+    stage.addChild(playerDeathText)
+
+    enemyKillText = new PIXI.Text(enemyKills, {fontFamily : 'Press Start 2P', fontSize: 16, fill : 0x00ff00})
+    enemyKillText.anchor.set(1, 0)
+    enemyKillText.position.x = RENDER_SIZE
+    enemyKillText.position.y = 2
+    stage.addChild(enemyKillText)
+
 	p1Sprite = new PIXI.Sprite(p1Texture)
     p1Sprite.prefixGodmode = 120
 	p1Sprite.anchor.set(0.5, 0.5)
@@ -81,14 +97,6 @@ function startGame() {
     p2Sprite.position.y = P2_START_Y
 	players.push(p2Sprite)
     stage.addChild(p2Sprite)
-
-    playerDeathText = new PIXI.Text(playerDeaths, {fontFamily : 'Arial', fontSize: 12, fill : 0xff1010, align : 'center'});
-    playerDeathText.position.x = 8
-    stage.addChild(playerDeathText)
-
-    enemyKillText = new PIXI.Text(enemyKills, {fontFamily : 'Monospace', fontSize: 12, fill : 0x00ff00, align : 'center'});
-    enemyKillText.position.x = RENDER_SIZE - 16
-    stage.addChild(enemyKillText)
 
     gameloop()
 }

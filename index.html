@@ -2,7 +2,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <link rel="icon" href="assets/images/favicon.png" type="image/png" sizes="16x16">
-<title>Skeleton Hill Action RPG</title>
+<title>Pews and Mines</title>
 <style>
 
 body {
@@ -14,6 +14,18 @@ body {
 }
 </style>
 <body>
+<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
+<script>
+    WebFont.load({
+        google: {
+            families: ['Press Start 2P']
+        },
+        active:e=>{
+            console.log("font loaded!");
+            // now start setting up your PixiJS (or canvas) stuff!
+        }
+    });
+</script>
 <script src="node_modules/pixi.js/dist/pixi.js" charset="utf-8"></script>
 <script src="main.js" charset="utf-8"></script>
 </body>
