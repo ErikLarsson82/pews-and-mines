@@ -41,6 +41,7 @@ PIXI.loader.add('assets/mine.png')
 PIXI.loader.add('assets/mine-trig.png')
 PIXI.loader.add('assets/blast-hull.png')
 PIXI.loader.add('assets/blast-shield.png')
+PIXI.loader.add('assets/logo.png')
 PIXI.loader.load(startGame)
 
 function startGame() {
@@ -87,6 +88,7 @@ function startGame() {
 	mineTrigTexture = PIXI.Texture.fromImage('assets/mine-trig.png')
 	blastHullTexture = PIXI.Texture.fromImage('assets/blast-hull.png')
 	blastShieldTexture = PIXI.Texture.fromImage('assets/blast-shield.png')
+    logoTexture = PIXI.Texture.fromImage('assets/logo.png')
 	
     stars = new Array(20).fill().map(() => {
         const star = new PIXI.Graphics()
@@ -99,53 +101,27 @@ function startGame() {
     })
 
     const topBorder = new PIXI.Graphics()
-    topBorder.beginFill(0x000000)
+    topBorder.beginFill(0x262b44)
     topBorder.drawRect(0, 0, RENDER_SIZE, 18)
     stage.addChild(topBorder)
 
     const topBorderIndent = new PIXI.Graphics()
-    topBorderIndent.beginFill(0x000000)
+    topBorderIndent.beginFill(0x262b44)
     topBorderIndent.drawRect(40, 18, RENDER_SIZE - 80, 8)
     stage.addChild(topBorderIndent)
 
-    waveText = new PIXI.Text('', {fontFamily : 'Press Start 2P', fontSize: 30, fill : 0x0000ff})
+    waveText = new PIXI.Text('', {fontFamily : 'Press Start 2P', fontSize: 30, fill : 0xffffff})
     waveText.prefixTimer = 180
     waveText.position.x = 42
-    waveText.position.y = 30
+    waveText.position.y = 50
     stage.addChild(waveText)
 
-    logoContainer = new PIXI.Container()
-    logoContainer.position.x = (RENDER_SIZE - 214) / 2
-    logoContainer.position.y = RENDER_SIZE / 4
-    stage.addChild(logoContainer)
-
-    const logoSquare = new PIXI.Graphics()
-    logoSquare.beginFill(0x000000)
-    logoSquare.alpha = 0.5
-    logoSquare.drawRect(0, 0, 214, 60)
-    logoContainer.addChild(logoSquare)
-
-    const logoPews = new PIXI.Text('Pews', {fontFamily : 'Press Start 2P', fontSize: 30, fill : 0x00ff00})
-    logoPews.position.x = 2
-    logoPews.position.y = 2
-    logoContainer.addChild(logoPews)
-
-    const logoAnd = new PIXI.Text('and', {fontFamily : 'Press Start 2P', fontSize: 20, fill : 0xffffff})
-    logoAnd.position.x = 6
-    logoAnd.position.y = 25
-    logoContainer.addChild(logoAnd)
-
-    const logoMines = new PIXI.Text('Mines', {fontFamily : 'Press Start 2P', fontSize: 30, fill : 0x0000ff})
-    logoMines.position.x = 65
-    logoMines.position.y = 30
-    logoContainer.addChild(logoMines)
-
-    playerDeathText = new PIXI.Text(playerDeaths, {fontFamily : 'Press Start 2P', fontSize: 16, fill : 0xff1010})
+    playerDeathText = new PIXI.Text(playerDeaths, {fontFamily : 'Press Start 2P', fontSize: 16, fill : 0xe43b44})
     playerDeathText.position.x = 2
     playerDeathText.position.y = 2
     stage.addChild(playerDeathText)
 
-    enemyKillText = new PIXI.Text(enemyKills, {fontFamily : 'Press Start 2P', fontSize: 16, fill : 0x00ff00})
+    enemyKillText = new PIXI.Text(enemyKills, {fontFamily : 'Press Start 2P', fontSize: 16, fill : 0x63c74d})
     enemyKillText.anchor.set(1, 0)
     enemyKillText.position.x = RENDER_SIZE
     enemyKillText.position.y = 2
@@ -172,6 +148,11 @@ function startGame() {
     p2Sprite.position.y = P2_START_Y
 	players.push(p2Sprite)
     stage.addChild(p2Sprite)
+
+    logoContainer = new PIXI.Sprite(logoTexture)
+    logoContainer.position.x = 30
+    logoContainer.position.y = RENDER_SIZE / 4
+    stage.addChild(logoContainer)
 
     gameloop()
 }
@@ -694,4 +675,4 @@ window.addEventListener('keyup', e => {
 	}
 })
 
-document.body.appendChild(renderer.view)
+document.getElementById('container').appendChild(renderer.view)
