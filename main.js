@@ -2,7 +2,7 @@
 let enemyHullTexture, enemyShieldTexture, pewTexture, mineTexture, mineTrigTexture, blastHullTexture, blastShieldTexture,
 	p1Texture, p1Sprite, p1up, p1down, p1left, p1right, p1shoot, p1cooldown,
 	p2Texture, p2Sprite, p2up, p2down, p2left, p2right, p2shoot, p2cooldown,
-	counter, pews, mines, enemies, ghosts, enemyKills, enemyKillText, highscoreText, playerDeaths, playerDeathText, spawnCounter, waveCounter
+	counter, pews, mines, enemies, ghosts, enemyKills, enemyKillText, highscoreText, playerDeaths, playerDeathText, spawnCounter, waveCounter, hasInput, logoContainer
 
 const RENDER_SIZE = 256
 
@@ -51,6 +51,8 @@ function startGame() {
 
     highscore = 0
 
+    hasInput = false
+
     pews = []
     mines = []
     blasts = []
@@ -78,6 +80,32 @@ function startGame() {
     topBorderIndent.beginFill(0x000000)
     topBorderIndent.drawRect(40, 18, RENDER_SIZE - 80, 8)
     stage.addChild(topBorderIndent)
+
+    logoContainer = new PIXI.Container()
+    logoContainer.position.x = (RENDER_SIZE - 214) / 2
+    logoContainer.position.y = RENDER_SIZE / 4
+    stage.addChild(logoContainer)
+
+    const logoSquare = new PIXI.Graphics()
+    logoSquare.beginFill(0x000000)
+    logoSquare.alpha = 0.5
+    logoSquare.drawRect(0, 0, 214, 60)
+    logoContainer.addChild(logoSquare)
+
+    const logoPews = new PIXI.Text('Pews', {fontFamily : 'Press Start 2P', fontSize: 30, fill : 0x00ff00})
+    logoPews.position.x = 2
+    logoPews.position.y = 2
+    logoContainer.addChild(logoPews)
+
+    const logoAnd = new PIXI.Text('and', {fontFamily : 'Press Start 2P', fontSize: 20, fill : 0xffffff})
+    logoAnd.position.x = 6
+    logoAnd.position.y = 25
+    logoContainer.addChild(logoAnd)
+
+    const logoMines = new PIXI.Text('Mines', {fontFamily : 'Press Start 2P', fontSize: 30, fill : 0x0000ff})
+    logoMines.position.x = 65
+    logoMines.position.y = 30
+    logoContainer.addChild(logoMines)
 
     playerDeathText = new PIXI.Text(playerDeaths, {fontFamily : 'Press Start 2P', fontSize: 16, fill : 0xff1010})
     playerDeathText.position.x = 2
@@ -502,10 +530,16 @@ function gameloop() {
     highscore = playerDeaths === 0 ? enemyKills * 1000 : Math.floor(enemyKills / playerDeaths * 1000)
     highscoreText.text = highscore
 
+    if (hasInput) {
+        logoContainer.visible = false
+    }
+
     renderer.render(stage)
 }
 
 window.addEventListener('keydown', e => {
+    hasInput = true
+
 	if (e.keyCode === 68) {
 		p1right = true
 	}
@@ -524,16 +558,6 @@ window.addEventListener('keydown', e => {
 
 	if (e.keyCode === 39) {
 		p2right = true
-        
-        /*ghostSprite = new PIXI.Sprite(p1Texture)
-        ghostSprite.prefixTimer = 80
-        ghostSprite.anchor.set(0.5, 0.5)
-        ghostSprite.position.x = Math.floor(Math.random() * RENDER_SIZE)
-        ghostSprite.position.y = Math.floor(Math.random() * RENDER_SIZE)
-        ghostSprite.blendMode = PIXI.BLEND_MODES.MULTIPLY
-        ghostSprite.tint = 0x000000
-        ghosts.push(ghostSprite)
-        stage.addChild(ghostSprite)*/
 	}
 	if (e.keyCode === 37) {
 		p2left = true
