@@ -2,7 +2,7 @@
 let enemyHullTexture, enemyShieldTexture, pewTexture, mineTexture, mineTrigTexture, blastHullTexture, blastShieldTexture,
 	p1Texture, p1Sprite, p1up, p1down, p1left, p1right, p1shoot, p1cooldown,
 	p2Texture, p2Sprite, p2up, p2down, p2left, p2right, p2shoot, p2cooldown,
-	counter, pews, mines, enemies, enemyKills, enemyKillText, highscoreText, playerDeaths, playerDeathText, spawnCounter, waveCounter
+	counter, pews, mines, enemies, ghosts, enemyKills, enemyKillText, highscoreText, playerDeaths, playerDeathText, spawnCounter, waveCounter
 
 const RENDER_SIZE = 256
 
@@ -56,6 +56,7 @@ function startGame() {
     blasts = []
     enemies = []
     players = []
+    ghosts = []
 
 	p1Texture = PIXI.Texture.fromImage('assets/player-1.png')
 	p2Texture = PIXI.Texture.fromImage('assets/player-2.png')
@@ -213,6 +214,16 @@ function gameloop() {
 			pewHit = true
 			playerDeaths++
 
+            const ghostSprite = new PIXI.Sprite(p2Texture)
+            ghostSprite.prefixTimer = 80
+            ghostSprite.anchor.set(0.5, 0.5)
+            ghostSprite.position.x = p2Sprite.position.x
+            ghostSprite.position.y = p2Sprite.position.y
+            ghostSprite.blendMode = PIXI.BLEND_MODES.MULTIPLY
+            ghostSprite.tint = 0x000000
+            ghosts.push(ghostSprite)
+            stage.addChild(ghostSprite)
+
             p2Sprite.prefixGodmode = 120
             p2Sprite.position.x = P2_START_X
             p2Sprite.position.y = P2_START_Y            
@@ -305,6 +316,16 @@ function gameloop() {
 			if (distance < 48) {
 				playerDeaths++
 
+                const ghostSprite = new PIXI.Sprite(player === p1Sprite ? p1Texture : p2Texture)
+                ghostSprite.prefixTimer = 80
+                ghostSprite.anchor.set(0.5, 0.5)
+                ghostSprite.position.x = player === p1Sprite ? p1Sprite.position.x : p2Sprite.position.x
+                ghostSprite.position.y = player === p1Sprite ? p1Sprite.position.y : p2Sprite.position.y
+                ghostSprite.blendMode = PIXI.BLEND_MODES.MULTIPLY
+                ghostSprite.tint = 0x000000
+                ghosts.push(ghostSprite)
+                stage.addChild(ghostSprite)
+
 				player.position.x = player === p1Sprite ? P1_START_X : P2_START_X
                 player.position.y = player === p1Sprite ? P1_START_Y : P2_START_Y
                 player.prefixGodmode = 120
@@ -323,6 +344,17 @@ function gameloop() {
     enemies.forEach(e => {
     	if (e.prefixHull <= 0) {
     		enemyKills++
+
+            const ghostSprite = new PIXI.Sprite(enemyHullTexture)
+            ghostSprite.prefixTimer = 40
+            ghostSprite.anchor.set(0.5, 0.5)
+            ghostSprite.position.x = e.position.x
+            ghostSprite.position.y = e.position.y
+            ghostSprite.blendMode = PIXI.BLEND_MODES.MULTIPLY
+            ghostSprite.tint = 0x000000
+            ghosts.push(ghostSprite)
+            stage.addChild(ghostSprite)
+
 			e.prefixDestroy = true
     		stage.removeChild(e)
 		}
@@ -342,6 +374,16 @@ function gameloop() {
     			stage.removeChild(e)
     			playerDeaths++
     			
+                const ghostSprite = new PIXI.Sprite(player === p1Sprite ? p1Texture : p2Texture)
+                ghostSprite.prefixTimer = 80
+                ghostSprite.anchor.set(0.5, 0.5)
+                ghostSprite.position.x = player === p1Sprite ? p1Sprite.position.x : p2Sprite.position.x
+                ghostSprite.position.y = player === p1Sprite ? p1Sprite.position.y : p2Sprite.position.y
+                ghostSprite.blendMode = PIXI.BLEND_MODES.MULTIPLY
+                ghostSprite.tint = 0x000000
+                ghosts.push(ghostSprite)
+                stage.addChild(ghostSprite)
+
                 player.position.x = player === p1Sprite ? P1_START_X : P2_START_X
                 player.position.y = player === p1Sprite ? P1_START_Y : P2_START_Y
                 player.prefixGodmode = 120
@@ -400,10 +442,23 @@ function gameloop() {
 
     })
 
+    ghosts.forEach(g => {
+        g.prefixTimer--
+
+        g.position.x += Math.sin(counter * 100)
+        //g.position.y += Math.sin(g.prefixTimer * 10000)
+
+        if (g.prefixTimer <= 0) {
+            g.prefixDestroy = true
+            stage.removeChild(g)
+        }
+    })
+
     pews = pews.filter(p => !p.prefixDestroy)
     enemies = enemies.filter(p => !p.prefixDestroy)
     mines = mines.filter(p => !p.prefixDestroy)
     blasts = blasts.filter(p => !p.prefixDestroy)
+    ghosts = ghosts.filter(p => !p.prefixDestroy)
     
     playerDeathText.text = playerDeaths
     enemyKillText.text = enemyKills
@@ -469,7 +524,16 @@ window.addEventListener('keydown', e => {
 
 	if (e.keyCode === 39) {
 		p2right = true
-        enemyKills++
+        
+        /*ghostSprite = new PIXI.Sprite(p1Texture)
+        ghostSprite.prefixTimer = 80
+        ghostSprite.anchor.set(0.5, 0.5)
+        ghostSprite.position.x = Math.floor(Math.random() * RENDER_SIZE)
+        ghostSprite.position.y = Math.floor(Math.random() * RENDER_SIZE)
+        ghostSprite.blendMode = PIXI.BLEND_MODES.MULTIPLY
+        ghostSprite.tint = 0x000000
+        ghosts.push(ghostSprite)
+        stage.addChild(ghostSprite)*/
 	}
 	if (e.keyCode === 37) {
 		p2left = true
