@@ -1,7 +1,10 @@
 
-let player, sprite, up, down, left, right, space
+let enemyHullTexture, enemyShieldTexture, pewTexture, mineTexture, mineTrigTexture, blastHullTexture, blastShieldTexture,
+	p1Texture, p1Sprite, p1up, p1down, p1left, p1right, p1shoot, p1cooldown,
+	p2Texture, p2Sprite, p2up, p2down, p2left, p2right, p2shoot, p2cooldown,
+	counter, pews, mines, enemies, enemyKills, enemyKillText, playerDeaths, playerDeathText, spawnCounter, waveCounter
 
-const RENDER_HEIGHT = 256
+const RENDER_SIZE = 256
 
 const config = {
     antialias: false,
@@ -10,45 +13,366 @@ const config = {
 }
 
 const stage = new PIXI.Container()
-const renderer = PIXI.autoDetectRenderer(RENDER_HEIGHT, RENDER_HEIGHT, config)
+const renderer = PIXI.autoDetectRenderer(RENDER_SIZE, RENDER_SIZE, config)
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST // Default pixel-scaling
 
 renderer.view.style.imageRendering = 'pixelated'
 renderer.backgroundColor = 0x222034
 
-PIXI.loader.add('assets/player.png')
-PIXI.loader.add('assets/player-swing.png')
-PIXI.loader.add('assets/skeleton.png')
+PIXI.loader.add('assets/player-1.png')
+PIXI.loader.add('assets/player-2.png')
+PIXI.loader.add('assets/enemy-hull.png')
+PIXI.loader.add('assets/enemy-shield.png')
+PIXI.loader.add('assets/pew.png')
+PIXI.loader.add('assets/mine.png')
+PIXI.loader.add('assets/mine-trig.png')
+PIXI.loader.add('assets/blast-hull.png')
+PIXI.loader.add('assets/blast-shield.png')
 PIXI.loader.load(startGame)
 
 function startGame() {
-	player = PIXI.Texture.fromImage('assets/player.png')
-	playerSwing = PIXI.Texture.fromImage('assets/player-swing.png')
-	
-	sprite = new PIXI.Sprite(player)
-    stage.addChild(sprite)
+    counter = 0
 
-    animate()
+    spawnCounter = 0
+
+    enemyKills = 0
+    playerDeaths = 0
+
+    p1cooldown = 0
+    p2cooldown = 0
+
+    waveCounter = 0
+
+    pews = []
+    mines = []
+    blasts = []
+    enemies = []
+    players = []
+
+	p1Texture = PIXI.Texture.fromImage('assets/player-1.png')
+	p2Texture = PIXI.Texture.fromImage('assets/player-2.png')
+
+	enemyHullTexture = PIXI.Texture.fromImage('assets/enemy-hull.png')
+	enemyShieldTexture = PIXI.Texture.fromImage('assets/enemy-shield.png')
+	pewTexture = PIXI.Texture.fromImage('assets/pew.png')
+	mineTexture = PIXI.Texture.fromImage('assets/mine.png')
+	mineTrigTexture = PIXI.Texture.fromImage('assets/mine-trig.png')
+	blastHullTexture = PIXI.Texture.fromImage('assets/blast-hull.png')
+	blastShieldTexture = PIXI.Texture.fromImage('assets/blast-shield.png')
+	
+	p1Sprite = new PIXI.Sprite(p1Texture)
+	p1Sprite.anchor.set(0.5, 0.5)
+	p1Sprite.position.x = 10
+	p1Sprite.position.y = RENDER_SIZE / 2
+	players.push(p1Sprite)
+    stage.addChild(p1Sprite)
+
+    p2Sprite = new PIXI.Sprite(p2Texture)
+    p2Sprite.anchor.set(0.5, 0.5)
+    p2Sprite.position.x = 10
+	p2Sprite.position.y = RENDER_SIZE / 2 + 20
+	players.push(p2Sprite)
+    stage.addChild(p2Sprite)
+
+    playerDeathText = new PIXI.Text(playerDeaths, {fontFamily : 'Arial', fontSize: 12, fill : 0xff1010, align : 'center'});
+    playerDeathText.position.x = 8
+    stage.addChild(playerDeathText)
+
+    enemyKillText = new PIXI.Text(enemyKills, {fontFamily : 'Monospace', fontSize: 12, fill : 0x00ff00, align : 'center'});
+    enemyKillText.position.x = RENDER_SIZE - 16
+    stage.addChild(enemyKillText)
+
+    gameloop()
 }
 
-function animate() {
-    requestAnimationFrame(animate)
+function gameloop() {
+    requestAnimationFrame(gameloop)
 
-    if (left) {
-    	sprite.position.x -= 1
+    counter = counter + 0.01
+
+    if (counter > 120) {
+    	counter = 0
+    } 
+
+    if (players.find(p => p === p1Sprite)) {
+	    if (p1left) {
+	    	p1Sprite.position.x -= 1
+	    }
+	    if (p1right) {
+	    	p1Sprite.position.x += 1
+	    }
+	    if (p1up) {
+	    	p1Sprite.position.y -= 1
+	    }
+	    if (p1down) {
+	    	p1Sprite.position.y += 1
+	    }
+	    if (p1shoot && p1cooldown <= 0) {
+	    	const pewSprite = new PIXI.Sprite(pewTexture)
+	    	pewSprite.anchor.set(0.5, 0.5)
+	    	pewSprite.position.x = p1Sprite.position.x
+	    	pewSprite.position.y = p1Sprite.position.y
+	    	stage.addChild(pewSprite)
+	    	pews.push(pewSprite)
+	    	p1cooldown = 8
+	    }
+
+	    if (p1cooldown > 0) {
+	    	p1cooldown = p1cooldown - 1
+	    }
+	}
+
+    if (players.find(p => p === p2Sprite)) {
+	    if (p2left) {
+	    	p2Sprite.position.x -= 1
+	    }
+	    if (p2right) {
+	    	p2Sprite.position.x += 1
+	    }
+	    if (p2up) {
+	    	p2Sprite.position.y -= 1
+	    }
+	    if (p2down) {
+	    	p2Sprite.position.y += 1
+	    }
+	    if (p2shoot && p2cooldown <= 0) {
+	    	const mineSprite = new PIXI.Sprite(mineTexture)
+	    	mineSprite.prefixActivationTimer = null
+	    	mineSprite.anchor.set(0.5, 0.5)
+	    	mineSprite.position.x = p2Sprite.position.x
+	    	mineSprite.position.y = p2Sprite.position.y
+	    	stage.addChild(mineSprite)
+	    	mines.push(mineSprite)
+	    	p2cooldown = 80
+	    }
+
+	    if (p2cooldown > 0) {
+	    	p2cooldown = p2cooldown - 1
+	    }
+	}
+
+    pews.forEach(p => {
+    	p.position.x = p.position.x + 2
+
+    	let pewHit = false
+
+    	enemies.forEach(e => {
+    		const dx = p.position.x - e.position.x
+    		const dy = p.position.y - e.position.y
+    		const distance = Math.sqrt(dx * dx + dy * dy)
+
+    		if (distance < 15) {
+    			pewHit = true
+    			if (e.prefixShield > 0) {
+    				e.prefixShield = e.prefixShield - 1
+    			} else {
+    				e.position.x += 3
+
+    				if (p.position.y > e.position.y) {
+    					e.position.y -= 5
+    				} else {
+    					e.position.y += 5
+    				}
+    			}
+    		}	
+    	})
+
+    	const dx = p.position.x - p2Sprite.position.x
+		const dy = p.position.y - p2Sprite.position.y
+		const distance = Math.sqrt(dx * dx + dy * dy)
+		if (distance < 15) {
+			pewHit = true
+			playerDeaths++
+			p2Sprite.position.x = Math.floor(Math.random() * RENDER_SIZE)
+			p2Sprite.position.y = Math.floor(Math.random() * RENDER_SIZE)
+		}
+
+		mines.forEach(m => {
+			const dx = p.position.x - m.position.x
+			const dy = p.position.y - m.position.y
+			const distance = Math.sqrt(dx * dx + dy * dy)
+
+			if (distance < 8) {
+				pewHit = true				
+
+				if (m.prefixActivationTimer === null) {
+					m.prefixActivationTimer = 40
+					m.prefixActivationType = 'shield'
+					m.texture = mineTrigTexture
+				}
+			}
+		})
+
+    	if (pewHit || p.position.x > RENDER_SIZE) {
+    		p.prefixDestroy = true
+    		stage.removeChild(p)
+    	} 
+    })
+
+    mines.forEach(m => {
+    	
+    	enemies.forEach(e => {
+    		const dx = m.position.x - e.position.x
+    		const dy = m.position.y - e.position.y
+    		const distance = Math.sqrt(dx * dx + dy * dy)	
+
+    		if (distance < 15 && m.prefixActivationTimer === null) {
+    			m.prefixActivationTimer = 40
+				m.prefixActivationType = 'hull'
+				m.texture = mineTrigTexture
+    		}			
+    	})
+
+    	const dx = m.position.x - p1Sprite.position.x
+		const dy = m.position.y - p1Sprite.position.y
+		const distance = Math.sqrt(dx * dx + dy * dy)
+		if (distance < 15 && m.prefixActivationTimer === null) {
+			m.prefixActivationTimer = 40
+			m.prefixActivationType = 'hull'
+			m.texture = mineTrigTexture
+		}
+
+		if (m.prefixActivationTimer !== null) {
+			if (m.prefixActivationTimer <= 0) {
+				m.prefixDestroy = true
+				stage.removeChild(m)
+
+				const blastSprite = new PIXI.Sprite(m.prefixActivationType === 'shield' ? blastShieldTexture : blastHullTexture)
+		    	blastSprite.anchor.set(0.5, 0.5)
+		    	blastSprite.prefixType = m.prefixActivationType
+		    	blastSprite.position.x = m.position.x
+		    	blastSprite.position.y = m.position.y
+		    	blastSprite.prefixTimer = 30
+		    	stage.addChild(blastSprite)
+		    	blasts.push(blastSprite)
+	    	} else {
+	    		m.prefixActivationTimer--
+	    	}
+	    }
+    })
+
+    blasts.forEach(blast => {
+
+    	enemies.forEach(e => {
+    		const dx = blast.position.x - e.position.x
+    		const dy = blast.position.y - e.position.y
+    		const distance = Math.sqrt(dx * dx + dy * dy)
+
+    		if (distance < 48) {
+    			if (blast.prefixType === 'shield') {
+    				e.prefixShield = 0
+    			} else if (blast.prefixType === 'hull' && e.prefixShield <= 0) {
+    				e.prefixHull = 0
+    			}
+    		}			
+    	})
+
+    	players.forEach(player => {
+    		const dx = blast.position.x - player.position.x
+			const dy = blast.position.y - player.position.y
+			const distance = Math.sqrt(dx * dx + dy * dy)
+			if (distance < 48) {
+				playerDeaths++
+				player.position.x = Math.floor(Math.random() * RENDER_SIZE)
+				player.position.y = Math.floor(Math.random() * RENDER_SIZE)
+			}
+
+    	})
+
+    	blast.prefixTimer = blast.prefixTimer - 1
+
+    	if (blast.prefixTimer <= 0) {
+    		blast.prefixDestroy = true
+    		stage.removeChild(blast)
+    	}
+    }) 
+
+    enemies.forEach(e => {
+    	if (e.prefixHull <= 0) {
+    		enemyKills++
+			e.prefixDestroy = true
+    		stage.removeChild(e)
+		}
+		if (e.position.x <= 0) {
+			e.prefixDestroy = true
+    		stage.removeChild(e)
+    		playerDeaths++
+		}
+
+		players.forEach(p => {
+			const dx = p.position.x - e.position.x
+    		const dy = p.position.y - e.position.y
+    		const distance = Math.sqrt(dx * dx + dy * dy)
+
+    		if (distance < 15) {
+    			e.prefixDestroy = true
+    			stage.removeChild(e)
+    			playerDeaths++
+    			p.position.x = Math.floor(Math.random() * RENDER_SIZE)
+    			p.position.y = Math.floor(Math.random() * RENDER_SIZE)
+    		}
+		})
+
+    	if (e.prefixShield > 0) {
+    		e.texture = enemyShieldTexture
+    	} else {
+    		e.texture = enemyHullTexture
+    	}
+
+    	if (e.prefixType === 'horizontal') {
+    		e.position.x = e.position.x - 0.075		
+    	} else if (e.prefixType === 'sinus') {
+    		e.position.x = e.position.x - 0.075
+    		e.position.y = e.position.y + Math.sin(counter) * 0.4
+    	} else if (e.prefixType === 'mini-sinus') {
+    		e.position.x = e.position.x - 0.2
+    		e.position.y = e.position.y + Math.sin(counter * 10) * 0.7
+    	}
+    })
+
+    pews = pews.filter(p => !p.prefixDestroy)
+    enemies = enemies.filter(p => !p.prefixDestroy)
+    mines = mines.filter(p => !p.prefixDestroy)
+    blasts = blasts.filter(p => !p.prefixDestroy)
+    
+    playerDeathText.text = playerDeaths
+    enemyKillText.text = enemyKills
+
+    spawnCounter++
+
+    const MAX_ENEMIES = 5
+
+    if (spawnCounter > 100 && waveCounter < MAX_ENEMIES) {
+    	waveCounter++
+    	spawnCounter = 0
+
+    	const enemy = new PIXI.Sprite(enemyShieldTexture)
+    	enemy.anchor.set(0.5, 0.5)
+
+    	const rand = Math.random()
+    	if (rand < 0.3) {
+	    	enemy.prefixType = 'horizontal'
+	    	enemy.prefixShield = 40
+	    	enemy.prefixHull = 40
+	    } else if (rand < 0.6) {
+	    	enemy.prefixType = 'sinus'
+	    	enemy.prefixShield = 40
+	    	enemy.prefixHull = 40
+	    } else {
+	    	enemy.prefixType = 'mini-sinus'
+	    	enemy.prefixShield = 0
+	    	enemy.prefixHull = 10
+	    }
+
+	    enemy.position.x = RENDER_SIZE - 16
+	    enemy.position.y = 80 + Math.floor(Math.random() * 100)
+	    enemies.push(enemy)
+	    stage.addChild(enemy)
     }
-    if (right) {
-    	sprite.position.x += 1
-    }
-    if (up) {
-    	sprite.position.y -= 1
-    }
-    if (down) {
-    	sprite.position.y += 1
-    }
-    if (space) {
-    	sprite.texture = playerSwing
+
+    if (waveCounter >= MAX_ENEMIES && enemies.length === 0) {
+    	waveCounter = 0
     }
 
     renderer.render(stage)
@@ -56,37 +380,69 @@ function animate() {
 
 window.addEventListener('keydown', e => {
 	if (e.keyCode === 68) {
-		right = true
+		p1right = true
 	}
 	if (e.keyCode === 65) {
-		left = true
+		p1left = true
 	}
 	if (e.keyCode === 87) {
-		up = true
+		p1up = true
 	}
 	if (e.keyCode === 83) {
-		down = true
+		p1down = true
+	}
+	if (e.keyCode === 32) {
+		p1shoot = true
+	}
+
+	if (e.keyCode === 39) {
+		p2right = true
+	}
+	if (e.keyCode === 37) {
+		p2left = true
+	}
+	if (e.keyCode === 38) {
+		p2up = true
+	}
+	if (e.keyCode === 40) {
+		p2down = true
 	}
 	if (e.keyCode === 13) {
-		space = true
+		p2shoot = true
 	}
 })
 
 window.addEventListener('keyup', e => {
 	if (e.keyCode === 68) {
-		right = false
+		p1right = false
 	}
 	if (e.keyCode === 65) {
-		left = false
+		p1left = false
 	}
 	if (e.keyCode === 87) {
-		up = false
+		p1up = false
 	}
 	if (e.keyCode === 83) {
-		down = false
+		p1down = false
+	}
+	if (e.keyCode === 32) {
+		p1shoot = false
+	}
+
+	if (e.keyCode === 39) {
+		p2right = false
+	}
+	if (e.keyCode === 37) {
+		p2left = false
+	}
+	if (e.keyCode === 38) {
+		p2up = false
+	}
+	if (e.keyCode === 40) {
+		p2down = false
 	}
 	if (e.keyCode === 13) {
-		space = false
+		p2shoot = false
 	}
 })
 
