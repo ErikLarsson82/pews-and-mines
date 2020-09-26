@@ -6,6 +6,11 @@ let enemyHullTexture, enemyShieldTexture, pewTexture, mineTexture, mineTrigTextu
 
 const RENDER_SIZE = 256
 
+const P1_START_X = 10
+const P2_START_X = 12
+const P1_START_Y = RENDER_SIZE / 2
+const P2_START_Y = RENDER_SIZE / 2 + 20
+
 const config = {
     antialias: false,
     transparent: false,
@@ -62,16 +67,18 @@ function startGame() {
 	blastShieldTexture = PIXI.Texture.fromImage('assets/blast-shield.png')
 	
 	p1Sprite = new PIXI.Sprite(p1Texture)
+    p1Sprite.prefixGodmode = 120
 	p1Sprite.anchor.set(0.5, 0.5)
-	p1Sprite.position.x = 10
-	p1Sprite.position.y = RENDER_SIZE / 2
+	p1Sprite.position.x = P1_START_X
+	p1Sprite.position.y = P1_START_Y
 	players.push(p1Sprite)
     stage.addChild(p1Sprite)
 
     p2Sprite = new PIXI.Sprite(p2Texture)
+    p2Sprite.prefixGodmode = 120
     p2Sprite.anchor.set(0.5, 0.5)
-    p2Sprite.position.x = 10
-	p2Sprite.position.y = RENDER_SIZE / 2 + 20
+    p2Sprite.position.x = P2_START_X
+    p2Sprite.position.y = P2_START_Y
 	players.push(p2Sprite)
     stage.addChild(p2Sprite)
 
@@ -184,8 +191,10 @@ function gameloop() {
 		if (distance < 15) {
 			pewHit = true
 			playerDeaths++
-			p2Sprite.position.x = Math.floor(Math.random() * RENDER_SIZE)
-			p2Sprite.position.y = Math.floor(Math.random() * RENDER_SIZE)
+
+            p2Sprite.prefixGodmode = 120
+            p2Sprite.position.x = P2_START_X
+            p2Sprite.position.y = P2_START_Y            
 		}
 
 		mines.forEach(m => {
@@ -274,8 +283,10 @@ function gameloop() {
 			const distance = Math.sqrt(dx * dx + dy * dy)
 			if (distance < 48) {
 				playerDeaths++
-				player.position.x = Math.floor(Math.random() * RENDER_SIZE)
-				player.position.y = Math.floor(Math.random() * RENDER_SIZE)
+
+				player.position.x = player === p1Sprite ? P1_START_X : P2_START_X
+                player.position.y = player === p1Sprite ? P1_START_Y : P2_START_Y
+                player.prefixGodmode = 120
 			}
 
     	})
@@ -300,17 +311,19 @@ function gameloop() {
     		playerDeaths++
 		}
 
-		players.forEach(p => {
-			const dx = p.position.x - e.position.x
-    		const dy = p.position.y - e.position.y
+		players.forEach(player => {
+			const dx = player.position.x - e.position.x
+    		const dy = player.position.y - e.position.y
     		const distance = Math.sqrt(dx * dx + dy * dy)
 
     		if (distance < 15) {
     			e.prefixDestroy = true
     			stage.removeChild(e)
     			playerDeaths++
-    			p.position.x = Math.floor(Math.random() * RENDER_SIZE)
-    			p.position.y = Math.floor(Math.random() * RENDER_SIZE)
+    			
+                player.position.x = player === p1Sprite ? P1_START_X : P2_START_X
+                player.position.y = player === p1Sprite ? P1_START_Y : P2_START_Y
+                player.prefixGodmode = 120
     		}
 		})
 
@@ -340,6 +353,13 @@ function gameloop() {
     })
 
     players.forEach(p => {
+        if (p.prefixGodmode >= 0) {
+            p.prefixGodmode--
+            p.visible = Math.sin(counter * 25) > 0
+        } else {
+            p.visible = true    
+        }
+
         if (p.position.y > 230) {
             p.position.y = 230
         }
@@ -355,6 +375,8 @@ function gameloop() {
         if (p.position.x < 15) {
             p.position.x = 15
         }
+
+
     })
 
     pews = pews.filter(p => !p.prefixDestroy)
