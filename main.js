@@ -3,7 +3,7 @@ let pewTexture, pewPuffTexture, mineTexture, mineTrigTexture, blastHullTexture, 
 	p1Texture, p1Sprite, p1up, p1down, p1left, p1right, p1shoot, p1cooldown,
 	p2Texture, p2Sprite, p2up, p2down, p2left, p2right, p2shoot, p2cooldown,
     enemy1ShieldTexture, enemy1HullTexture, enemy2ShieldTexture, enemy2HullTexture, enemy3HullTexture,
-	counter, pews, pewPuffs, mines, enemies, ghosts, enemyKills, enemyKillText, highscoreText, playerDeaths, playerDeathText, spawnCounter, waveCounter, hasInput, logoContainer
+	counter, pews, pewPuffs, mines, enemies, ghosts, enemyKills, enemyKillText, highscoreText, playerDeaths, playerDeathText, spawnCounter, waveCounter, hasInput, logoContainer, stars
 
 const RENDER_SIZE = 256
 
@@ -84,6 +84,16 @@ function startGame() {
 	blastHullTexture = PIXI.Texture.fromImage('assets/blast-hull.png')
 	blastShieldTexture = PIXI.Texture.fromImage('assets/blast-shield.png')
 	
+    stars = new Array(20).fill().map(() => {
+        const star = new PIXI.Graphics()
+        star.position.x = Math.floor(Math.random() * RENDER_SIZE)
+        star.position.y = Math.floor(Math.random() * RENDER_SIZE)
+        star.beginFill(0x262b44)
+        star.drawRect(0, 0, 1, 1)
+        stage.addChild(star)
+        return star
+    })
+
     const topBorder = new PIXI.Graphics()
     topBorder.beginFill(0x000000)
     topBorder.drawRect(0, 0, RENDER_SIZE, 18)
@@ -232,7 +242,7 @@ function gameloop() {
     		const dy = p.position.y - e.position.y
     		const distance = Math.sqrt(dx * dx + dy * dy)
 
-    		if (distance < 15) {
+    		if (distance < 8 + 2) {
     			pewHit = true
     			if (e.prefixShield > 0) {
     				e.prefixShield = e.prefixShield - 1
@@ -251,7 +261,7 @@ function gameloop() {
     	const dx = p.position.x - p2Sprite.position.x
 		const dy = p.position.y - p2Sprite.position.y
 		const distance = Math.sqrt(dx * dx + dy * dy)
-		if (distance < 15) {
+		if (distance < 8 + 2) {
 			pewHit = true
 			playerDeaths++
 
@@ -275,7 +285,7 @@ function gameloop() {
 			const dy = p.position.y - m.position.y
 			const distance = Math.sqrt(dx * dx + dy * dy)
 
-			if (distance < 8) {
+			if (distance < 2 + 2 + 2) {
 				pewHit = true				
 
 				if (m.prefixActivationTimer === null) {
@@ -316,7 +326,7 @@ function gameloop() {
     		const dy = m.position.y - e.position.y
     		const distance = Math.sqrt(dx * dx + dy * dy)	
 
-    		if (distance < 15 && m.prefixActivationTimer === null) {
+    		if (distance < 8 + 2 && m.prefixActivationTimer === null) {
     			m.prefixActivationTimer = 40
 				m.prefixActivationType = 'hull'
 				m.texture = mineTrigTexture
@@ -326,7 +336,7 @@ function gameloop() {
     	const dx = m.position.x - p1Sprite.position.x
 		const dy = m.position.y - p1Sprite.position.y
 		const distance = Math.sqrt(dx * dx + dy * dy)
-		if (distance < 15 && m.prefixActivationTimer === null) {
+		if (distance < 8 + 2 && m.prefixActivationTimer === null) {
 			m.prefixActivationTimer = 40
 			m.prefixActivationType = 'hull'
 			m.texture = mineTrigTexture
@@ -358,7 +368,7 @@ function gameloop() {
     		const dy = blast.position.y - e.position.y
     		const distance = Math.sqrt(dx * dx + dy * dy)
 
-    		if (distance < 48) {
+    		if (distance < 48 + 8) {
     			if (blast.prefixType === 'shield') {
     				e.prefixShield = 0
     			} else if (blast.prefixType === 'hull' && e.prefixShield <= 0) {
@@ -371,7 +381,7 @@ function gameloop() {
     		const dx = blast.position.x - player.position.x
 			const dy = blast.position.y - player.position.y
 			const distance = Math.sqrt(dx * dx + dy * dy)
-			if (distance < 48) {
+			if (distance < 48 + 8) {
 				playerDeaths++
 
                 const ghostSprite = new PIXI.Sprite(player === p1Sprite ? p1Texture : p2Texture)
@@ -436,7 +446,7 @@ function gameloop() {
     		const dy = player.position.y - e.position.y
     		const distance = Math.sqrt(dx * dx + dy * dy)
 
-    		if (distance < 15) {
+    		if (distance < 8 + 8) {
     			e.prefixDestroy = true
     			stage.removeChild(e)
     			playerDeaths++
@@ -527,6 +537,14 @@ function gameloop() {
         if (g.prefixTimer <= 0) {
             g.prefixDestroy = true
             stage.removeChild(g)
+        }
+    })
+
+    stars.forEach(s => {
+        s.position.x -= 0.1
+
+        if (s.position.x < 0) {
+            s.position.x = RENDER_SIZE
         }
     })
 
