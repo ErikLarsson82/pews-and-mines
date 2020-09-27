@@ -257,6 +257,7 @@ function gameloop() {
     		const dy = pew.position.y - enemy.position.y
     		const distance = Math.sqrt(dx * dx + dy * dy)
 
+            // collision pew - enemy
     		if (distance < 8 + 2) {
     			pewHit = true
     			if (enemy.prefixShield > 0) {
