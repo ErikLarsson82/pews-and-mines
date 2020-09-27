@@ -91,13 +91,7 @@ function startGame() {
     textures = {
         p1: PIXI.Texture.fromImage('assets/player-1.png'),
         p2: PIXI.Texture.fromImage('assets/player-2.png'),
-        logo: PIXI.Texture.fromImage('assets/logo.png'),
-        pew: PIXI.Texture.fromImage('assets/pew.png'),
-        'pew-puff': PIXI.Texture.fromImage('assets/pew-puff.png'),
-        mine: PIXI.Texture.fromImage('assets/mine.png'),
         'mine-trig': PIXI.Texture.fromImage('assets/mine-trig.png'),
-        'blast-hull': PIXI.Texture.fromImage('assets/blast-hull.png'),
-        'blast-shield': PIXI.Texture.fromImage('assets/blast-shield.png'),
         enemies: {
             horizontal: {
                 shield: PIXI.Texture.fromImage('assets/enemy1-shield.png'),
@@ -172,7 +166,7 @@ function startGame() {
 	players.push(p2Sprite)
     stage.addChild(p2Sprite)
 
-    logoContainer = new PIXI.Sprite(textures.logo)
+    logoContainer = new PIXI.Sprite(PIXI.Texture.fromImage('assets/logo.png'))
     logoContainer.position.x = 30
     logoContainer.position.y = RENDER_SIZE / 4
     stage.addChild(logoContainer)
@@ -203,7 +197,7 @@ function gameloop() {
 	    	p1Sprite.position.y += 1
 	    }
 	    if (controls.p1.shoot && p1cooldown <= 0) {
-	    	const pewSprite = new PIXI.Sprite(textures.pew)
+	    	const pewSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/pew.png'))
 	    	pewSprite.anchor.set(0.5, 0.5)
 	    	pewSprite.position.x = p1Sprite.position.x
 	    	pewSprite.position.y = p1Sprite.position.y
@@ -231,7 +225,7 @@ function gameloop() {
 	    	p2Sprite.position.y += 1
 	    }
 	    if (controls.p2.shoot && p2cooldown <= 0) {
-	    	const mineSprite = new PIXI.Sprite(textures.mine)
+	    	const mineSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/mine.png'))
 	    	mineSprite.prefixActivationTimer = null
 	    	mineSprite.anchor.set(0.5, 0.5)
 	    	mineSprite.position.x = p2Sprite.position.x
@@ -311,7 +305,7 @@ function gameloop() {
 		})
 
     	if (pewHit || p.position.x > RENDER_SIZE) {
-            const pewPuff = new PIXI.Sprite(textures['pew-puff'])
+            const pewPuff = new PIXI.Sprite(PIXI.Texture.fromImage('assets/pew-puff.png'))
             pewPuff.prefixTimer = 5
             pewPuff.anchor.set(0.5, 0.5)
             pewPuff.position.x = p.position.x
@@ -361,7 +355,11 @@ function gameloop() {
 				m.prefixDestroy = true
 				stage.removeChild(m)
 
-				const blastSprite = new PIXI.Sprite(m.prefixActivationType === 'shield' ? textures['blast-shield'] : textures['blast-hull'])
+                const texture = m.prefixActivationType === 'shield'
+                    ? PIXI.Texture.fromImage('assets/blast-shield.png')
+                    : PIXI.Texture.fromImage('assets/blast-hull.png')
+                    
+				const blastSprite = new PIXI.Sprite(texture)
 		    	blastSprite.anchor.set(0.5, 0.5)
 		    	blastSprite.prefixType = m.prefixActivationType
 		    	blastSprite.position.x = m.position.x
