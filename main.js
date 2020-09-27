@@ -24,6 +24,8 @@ const controls = {
 
 const guiTexts = {}
 
+const ENEMIES_PER_WAVE = 5
+
 const RENDER_SIZE = 256
 
 const P1_START_X = 10
@@ -183,6 +185,7 @@ function gameloop() {
     	counter = 0
     } 
 
+    // tick p1
     if (players.find(p => p === p1Sprite)) {
 	    if (controls.p1.left) {
 	    	p1Sprite.position.x -= 1
@@ -197,6 +200,7 @@ function gameloop() {
 	    	p1Sprite.position.y += 1
 	    }
 	    if (controls.p1.shoot && p1cooldown <= 0) {
+            // create pew
 	    	const pewSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/pew.png'))
 	    	pewSprite.anchor.set(0.5, 0.5)
 	    	pewSprite.position.x = p1Sprite.position.x
@@ -211,6 +215,7 @@ function gameloop() {
 	    }
 	}
 
+    // tick p2
     if (players.find(p => p === p2Sprite)) {
 	    if (controls.p2.left) {
 	    	p2Sprite.position.x -= 1
@@ -225,6 +230,7 @@ function gameloop() {
 	    	p2Sprite.position.y += 1
 	    }
 	    if (controls.p2.shoot && p2cooldown <= 0) {
+            // create mine
 	    	const mineSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/mine.png'))
 	    	mineSprite.prefixActivationTimer = null
 	    	mineSprite.anchor.set(0.5, 0.5)
@@ -240,36 +246,39 @@ function gameloop() {
 	    }
 	}
 
-    pews.forEach(p => {
-    	p.position.x = p.position.x + 2
+    // tick pews
+    pews.forEach(pew => {
+    	pew.position.x = pew.position.x + 2
 
     	let pewHit = false
 
-    	enemies.forEach(e => {
-    		const dx = p.position.x - e.position.x
-    		const dy = p.position.y - e.position.y
+    	enemies.forEach(enemy => {
+    		const dx = pew.position.x - enemy.position.x
+    		const dy = pew.position.y - enemy.position.y
     		const distance = Math.sqrt(dx * dx + dy * dy)
 
     		if (distance < 8 + 2) {
     			pewHit = true
-    			if (e.prefixShield > 0) {
-    				e.prefixShield = e.prefixShield - 1
+    			if (enemy.prefixShield > 0) {
+    				enemy.prefixShield = enemy.prefixShield - 1
     			} else {
-    				e.position.x += 3
+    				enemy.position.x += 3
 
-    				if (p.position.y > e.position.y) {
-    					e.position.y -= 5
+    				if (pew.position.y > enemy.position.y) {
+    					enemy.position.y -= 5
     				} else {
-    					e.position.y += 5
+    					enemy.position.y += 5
     				}
     			}
     		}	
     	})
 
-    	const dx = p.position.x - p2Sprite.position.x
-		const dy = p.position.y - p2Sprite.position.y
+    	const dx = pew.position.x - p2Sprite.position.x
+		const dy = pew.position.y - p2Sprite.position.y
 		const distance = Math.sqrt(dx * dx + dy * dy)
-		if (distance < 8 + 2) {
+		
+        // collision pew - p2
+        if (distance < 8 + 2) {
 			pewHit = true
 			playerDeaths++
 
@@ -288,103 +297,113 @@ function gameloop() {
             p2Sprite.position.y = P2_START_Y            
 		}
 
-		mines.forEach(m => {
-			const dx = p.position.x - m.position.x
-			const dy = p.position.y - m.position.y
+		mines.forEach(mine => {
+			const dx = pew.position.x - mine.position.x
+			const dy = pew.position.y - mine.position.y
 			const distance = Math.sqrt(dx * dx + dy * dy)
 
+            // collision pew - mine
 			if (distance < 2 + 2 + 2) {
 				pewHit = true				
 
-				if (m.prefixActivationTimer === null) {
-					m.prefixActivationTimer = 40
-					m.prefixActivationType = 'shield'
-					m.texture = textures['mine-trig']
+				if (mine.prefixActivationTimer === null) {
+					mine.prefixActivationTimer = 40
+					mine.prefixActivationType = 'shield'
+					mine.texture = textures['mine-trig']
 				}
 			}
 		})
 
-    	if (pewHit || p.position.x > RENDER_SIZE) {
+    	if (pewHit || pew.position.x > RENDER_SIZE) {
+            // create pewpuff
             const pewPuff = new PIXI.Sprite(PIXI.Texture.fromImage('assets/pew-puff.png'))
             pewPuff.prefixTimer = 5
             pewPuff.anchor.set(0.5, 0.5)
-            pewPuff.position.x = p.position.x
-            pewPuff.position.y = p.position.y
+            pewPuff.position.x = pew.position.x
+            pewPuff.position.y = pew.position.y
             pewPuffs.push(pewPuff)
             stage.addChild(pewPuff)
     
-    		p.prefixDestroy = true
-    		stage.removeChild(p)
+    		pew.prefixDestroy = true
+    		stage.removeChild(pew)
     	} 
     })
 
-    pewPuffs.forEach(pp => {
-        pp.prefixTimer--
+    // tick pewpuffs
+    pewPuffs.forEach(pewpuff => {
+        pewpuff.prefixTimer--
 
-        if (pp.prefixTimer <= 0) {
-            pp.prefixDestroy = true
-            stage.removeChild(pp)
+        if (pewpuff.prefixTimer <= 0) {
+            pewpuff.prefixDestroy = true
+            stage.removeChild(pewpuff)
         }
     })
 
-    mines.forEach(m => {
+    // tick mines
+    mines.forEach(mine => {
     	
-    	enemies.forEach(e => {
-    		const dx = m.position.x - e.position.x
-    		const dy = m.position.y - e.position.y
+    	enemies.forEach(enemy => {
+    		const dx = mine.position.x - enemy.position.x
+    		const dy = mine.position.y - enemy.position.y
     		const distance = Math.sqrt(dx * dx + dy * dy)	
 
-    		if (distance < 8 + 2 && m.prefixActivationTimer === null) {
-    			m.prefixActivationTimer = 40
-				m.prefixActivationType = 'hull'
-				m.texture = textures['mine-trig']
+            // collision mine - enemy
+    		if (distance < 8 + 2 && mine.prefixActivationTimer === null) {
+    			mine.prefixActivationTimer = 40
+				mine.prefixActivationType = 'hull'
+				mine.texture = textures['mine-trig']
     		}			
     	})
 
-    	const dx = m.position.x - p1Sprite.position.x
-		const dy = m.position.y - p1Sprite.position.y
+    	const dx = mine.position.x - p1Sprite.position.x
+		const dy = mine.position.y - p1Sprite.position.y
 		const distance = Math.sqrt(dx * dx + dy * dy)
-		if (distance < 8 + 2 && m.prefixActivationTimer === null) {
-			m.prefixActivationTimer = 40
-			m.prefixActivationType = 'hull'
-			m.texture = textures['mine-trig']
+
+        // collision mine - p1
+		if (distance < 8 + 2 && mine.prefixActivationTimer === null) {
+			mine.prefixActivationTimer = 40
+			mine.prefixActivationType = 'hull'
+			mine.texture = textures['mine-trig']
 		}
 
-		if (m.prefixActivationTimer !== null) {
-			if (m.prefixActivationTimer <= 0) {
-				m.prefixDestroy = true
-				stage.removeChild(m)
+		if (mine.prefixActivationTimer !== null) {
+			if (mine.prefixActivationTimer <= 0) {
+				mine.prefixDestroy = true
+				stage.removeChild(mine)
 
-                const texture = m.prefixActivationType === 'shield'
+                const texture = mine.prefixActivationType === 'shield'
                     ? PIXI.Texture.fromImage('assets/blast-shield.png')
                     : PIXI.Texture.fromImage('assets/blast-hull.png')
-                    
+
+                // create blast
 				const blastSprite = new PIXI.Sprite(texture)
 		    	blastSprite.anchor.set(0.5, 0.5)
-		    	blastSprite.prefixType = m.prefixActivationType
-		    	blastSprite.position.x = m.position.x
-		    	blastSprite.position.y = m.position.y
+		    	blastSprite.prefixType = mine.prefixActivationType
+		    	blastSprite.position.x = mine.position.x
+		    	blastSprite.position.y = mine.position.y
 		    	blastSprite.prefixTimer = 30
 		    	stage.addChild(blastSprite)
 		    	blasts.push(blastSprite)
 	    	} else {
-	    		m.prefixActivationTimer--
+	    		mine.prefixActivationTimer--
 	    	}
 	    }
     })
 
+    // tick blasts
     blasts.forEach(blast => {
 
-    	enemies.forEach(e => {
-    		const dx = blast.position.x - e.position.x
-    		const dy = blast.position.y - e.position.y
+    	enemies.forEach(enemy => {
+    		const dx = blast.position.x - enemy.position.x
+    		const dy = blast.position.y - enemy.position.y
     		const distance = Math.sqrt(dx * dx + dy * dy)
 
+            // collision blast - enemy
     		if (distance < 48 + 8) {
     			if (blast.prefixType === 'shield') {
-    				e.prefixShield = 0
-    			} else if (blast.prefixType === 'hull' && e.prefixShield <= 0) {
-    				e.prefixHull = 0
+    				enemy.prefixShield = 0
+    			} else if (blast.prefixType === 'hull' && enemy.prefixShield <= 0) {
+    				enemy.prefixHull = 0
     			}
     		}			
     	})
@@ -393,6 +412,8 @@ function gameloop() {
     		const dx = blast.position.x - player.position.x
 			const dy = blast.position.y - player.position.y
 			const distance = Math.sqrt(dx * dx + dy * dy)
+
+            // collision blast - players
 			if (distance < 48 + 8) {
 				playerDeaths++
 
@@ -421,46 +442,48 @@ function gameloop() {
     	}
     }) 
 
-    enemies.forEach(e => {
-    	if (e.prefixHull <= 0) {
+    // tick enemies
+    enemies.forEach(enemy => {
+    	if (enemy.prefixHull <= 0) {
     		enemyKills++
 
             const ghostSprite = new PIXI.Sprite()
 
-            if (e.prefixType === 'horizontal') {
+            if (enemy.prefixType === 'horizontal') {
                 ghostSprite.texture = textures.enemies.horizontal.hull
-            } else if (e.prefixType === 'sinus') {
+            } else if (enemy.prefixType === 'sinus') {
                 ghostSprite.texture = textures.enemies.sinus.hull
-            } else if (e.prefixType === 'mini-sinus') {
+            } else if (enemy.prefixType === 'mini-sinus') {
                 ghostSprite.texture = textures.enemies['mini-sinus'].hull
             }
 
             ghostSprite.prefixTimer = 40
             ghostSprite.anchor.set(0.5, 0.5)
-            ghostSprite.position.x = e.position.x
-            ghostSprite.position.y = e.position.y
+            ghostSprite.position.x = enemy.position.x
+            ghostSprite.position.y = enemy.position.y
             ghostSprite.blendMode = PIXI.BLEND_MODES.MULTIPLY
             ghostSprite.tint = 0x000000
             ghosts.push(ghostSprite)
             stage.addChild(ghostSprite)
 
-			e.prefixDestroy = true
-    		stage.removeChild(e)
+			enemy.prefixDestroy = true
+    		stage.removeChild(enemy)
 		}
-		if (e.position.x <= 0) {
-			e.prefixDestroy = true
-    		stage.removeChild(e)
+		if (enemy.position.x <= 0) {
+			enemy.prefixDestroy = true
+    		stage.removeChild(enemy)
     		playerDeaths++
 		}
 
 		players.forEach(player => {
-			const dx = player.position.x - e.position.x
-    		const dy = player.position.y - e.position.y
+			const dx = player.position.x - enemy.position.x
+    		const dy = player.position.y - enemy.position.y
     		const distance = Math.sqrt(dx * dx + dy * dy)
 
+            // collision enemy - players
     		if (distance < 8 + 8) {
-    			e.prefixDestroy = true
-    			stage.removeChild(e)
+    			enemy.prefixDestroy = true
+    			stage.removeChild(enemy)
     			playerDeaths++
     			
                 const ghostSprite = new PIXI.Sprite(player === p1Sprite ? textures.p1 : textures.p2)
@@ -479,100 +502,101 @@ function gameloop() {
     		}
 		})
 
-    	if (e.prefixShield > 0) {
-            if (e.prefixType === 'horizontal') {
-                e.texture = textures.enemies.horizontal.shield
-            } else if (e.prefixType === 'sinus') {
-                e.texture = textures.enemies.sinus.shield    
+    	if (enemy.prefixShield > 0) {
+            if (enemy.prefixType === 'horizontal') {
+                enemy.texture = textures.enemies.horizontal.shield
+            } else if (enemy.prefixType === 'sinus') {
+                enemy.texture = textures.enemies.sinus.shield    
             }
     	} else {
-            if (e.prefixType === 'horizontal') {
-    		  e.texture = textures.enemies.horizontal.hull
-            } else if (e.prefixType === 'sinus') {
-              e.texture = textures.enemies.sinus.hull
-            } else if (e.prefixType === 'mini-sinus') {
-              e.texture = textures.enemies['mini-sinus'].hull
+            if (enemy.prefixType === 'horizontal') {
+    		  enemy.texture = textures.enemies.horizontal.hull
+            } else if (enemy.prefixType === 'sinus') {
+              enemy.texture = textures.enemies.sinus.hull
+            } else if (enemy.prefixType === 'mini-sinus') {
+              enemy.texture = textures.enemies['mini-sinus'].hull
             }
     	}
 
-    	if (e.prefixType === 'horizontal') {
-    		e.position.x = e.position.x - 0.075		
-    	} else if (e.prefixType === 'sinus') {
-    		e.position.x = e.position.x - 0.075
-    		e.position.y = e.position.y + Math.sin(counter) * 0.4
-    	} else if (e.prefixType === 'mini-sinus') {
-    		e.position.x = e.position.x - 0.2
-    		e.position.y = e.position.y + Math.sin(counter * 10) * 0.7
+    	if (enemy.prefixType === 'horizontal') {
+    		enemy.position.x = enemy.position.x - 0.075		
+    	} else if (enemy.prefixType === 'sinus') {
+    		enemy.position.x = enemy.position.x - 0.075
+    		enemy.position.y = enemy.position.y + Math.sin(counter) * 0.4
+    	} else if (enemy.prefixType === 'mini-sinus') {
+    		enemy.position.x = enemy.position.x - 0.2
+    		enemy.position.y = enemy.position.y + Math.sin(counter * 10) * 0.7
     	}
 
-    	if (e.position.y > 220) {
-    		e.position.y = 220
+    	if (enemy.position.y > 220) {
+    		enemy.position.y = 220
     	}
 
-    	if (e.position.y < 30) {
-    		e.position.y = 30
+    	if (enemy.position.y < 30) {
+    		enemy.position.y = 30
     	}
     })
 
-    players.forEach(p => {
-        if (p.prefixGodmode >= 0) {
-            p.prefixGodmode--
-            p.visible = Math.sin(counter * 25) > 0
+    // tick players
+    players.forEach(player => {
+        if (player.prefixGodmode >= 0) {
+            player.prefixGodmode--
+            player.visible = Math.sin(counter * 25) > 0
         } else {
-            p.visible = true    
+            player.visible = true    
         }
 
-        if (p.position.y > 230) {
-            p.position.y = 230
+        if (player.position.y > 230) {
+            player.position.y = 230
         }
 
-        if (p.position.y < 30) {
-            p.position.y = 30
+        if (player.position.y < 30) {
+            player.position.y = 30
         }
 
-        if (p.position.x > 240) {
-            p.position.x = 240
+        if (player.position.x > 240) {
+            player.position.x = 240
         }
 
-        if (p.position.x < 15) {
-            p.position.x = 15
+        if (player.position.x < 15) {
+            player.position.x = 15
         }
 
 
     })
 
-    ghosts.forEach(g => {
-        g.prefixTimer--
+    // tick ghosts
+    ghosts.forEach(ghost => {
+        ghost.prefixTimer--
 
-        g.position.x += Math.sin(counter * 100)
+        ghost.position.x += Math.sin(counter * 100)
         
-        if (g.prefixTimer <= 0) {
-            g.prefixDestroy = true
-            stage.removeChild(g)
+        if (ghost.prefixTimer <= 0) {
+            ghost.prefixDestroy = true
+            stage.removeChild(ghost)
         }
     })
 
-    stars.forEach(s => {
-        s.position.x -= 0.1
+    // tick stars
+    stars.forEach(star => {
+        star.position.x -= 0.1
 
-        if (s.position.x < 0) {
-            s.position.x = RENDER_SIZE
+        if (star.position.x < 0) {
+            star.position.x = RENDER_SIZE
         }
     })
 
-    pews = pews.filter(p => !p.prefixDestroy)
-    pewPuffs = pewPuffs.filter(p => !p.prefixDestroy)
-    enemies = enemies.filter(p => !p.prefixDestroy)
-    mines = mines.filter(p => !p.prefixDestroy)
-    blasts = blasts.filter(p => !p.prefixDestroy)
-    ghosts = ghosts.filter(p => !p.prefixDestroy)
+    pews = pews.filter(x => !x.prefixDestroy)
+    pewPuffs = pewPuffs.filter(x => !x.prefixDestroy)
+    enemies = enemies.filter(x => !x.prefixDestroy)
+    mines = mines.filter(x => !x.prefixDestroy)
+    blasts = blasts.filter(x => !x.prefixDestroy)
+    ghosts = ghosts.filter(x => !x.prefixDestroy)
     
     guiTexts.playerDeathText.text = playerDeaths
     guiTexts.enemyKillText.text = enemyKills
 
     spawnCounter++
-
-    const MAX_ENEMIES = 5
 
     if (guiTexts.waveText.prefixTimer > 0 && hasInput) {
         guiTexts.waveText.prefixTimer--
@@ -582,7 +606,7 @@ function gameloop() {
         guiTexts.waveText.visible = false
     }
 
-    if (spawnCounter > 100 && waveCounter < MAX_ENEMIES && hasInput) {
+    if (spawnCounter > 100 && waveCounter < ENEMIES_PER_WAVE && hasInput) {
     	waveCounter++
     	spawnCounter = 0
 
@@ -610,7 +634,7 @@ function gameloop() {
 	    stage.addChild(enemy)
     }
 
-    if (waveCounter >= MAX_ENEMIES && enemies.length === 0) {
+    if (waveCounter >= ENEMIES_PER_WAVE && enemies.length === 0) {
     	waveCounter = 0
         wave++
         guiTexts.waveText.prefixTimer = 180
