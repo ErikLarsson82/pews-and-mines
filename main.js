@@ -1,11 +1,12 @@
 
-let pewTexture, pewPuffTexture, mineTexture, mineTrigTexture, blastHullTexture, blastShieldTexture,
-	p1Texture, p1Sprite, p1up, p1down, p1left, p1right, p1shoot, p1cooldown,
-	p2Texture, p2Sprite, p2up, p2down, p2left, p2right, p2shoot, p2cooldown,
-    enemy1ShieldTexture, enemy1HullTexture, enemy2ShieldTexture, enemy2HullTexture, enemy3HullTexture,
-	counter, pews, pewPuffs, mines, enemies, ghosts, enemyKills, enemyKillText, highscoreText,
-    playerDeaths, playerDeathText, spawnCounter, hasInput, logoContainer, stars,
-    waveCounter, wave, waveText
+let textures,
+    p1Sprite, p1up, p1down, p1left, p1right, p1shoot, p1cooldown,
+	p2Sprite, p2up, p2down, p2left, p2right, p2shoot, p2cooldown,
+    counter, pews, pewPuffs, mines, enemies, ghosts, enemyKills,
+    playerDeaths, spawnCounter, hasInput, logoContainer, stars,
+    waveCounter, wave
+
+const guiTexts = {}
 
 const RENDER_SIZE = 256
 
@@ -23,7 +24,7 @@ const config = {
 const stage = new PIXI.Container()
 const renderer = PIXI.autoDetectRenderer(RENDER_SIZE, RENDER_SIZE, config)
 
-PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST // Default pixel-scaling
+PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
 
 renderer.view.style.imageRendering = 'pixelated'
 renderer.backgroundColor = 0x181425
@@ -71,24 +72,30 @@ function startGame() {
     players = []
     ghosts = []
 
-	p1Texture = PIXI.Texture.fromImage('assets/player-1.png')
-	p2Texture = PIXI.Texture.fromImage('assets/player-2.png')
-
-	enemy1ShieldTexture = PIXI.Texture.fromImage('assets/enemy1-shield.png')
-    enemy1HullTexture = PIXI.Texture.fromImage('assets/enemy1-hull.png')
-
-    enemy2ShieldTexture = PIXI.Texture.fromImage('assets/enemy2-shield.png')
-    enemy2HullTexture = PIXI.Texture.fromImage('assets/enemy2-hull.png')
-
-    enemy3HullTexture = PIXI.Texture.fromImage('assets/enemy3-hull.png')
-    
-	pewTexture = PIXI.Texture.fromImage('assets/pew.png')
-    pewPuffTexture = PIXI.Texture.fromImage('assets/pew-puff.png')
-	mineTexture = PIXI.Texture.fromImage('assets/mine.png')
-	mineTrigTexture = PIXI.Texture.fromImage('assets/mine-trig.png')
-	blastHullTexture = PIXI.Texture.fromImage('assets/blast-hull.png')
-	blastShieldTexture = PIXI.Texture.fromImage('assets/blast-shield.png')
-    logoTexture = PIXI.Texture.fromImage('assets/logo.png')
+    textures = {
+        p1: PIXI.Texture.fromImage('assets/player-1.png'),
+        p2: PIXI.Texture.fromImage('assets/player-2.png'),
+        logo: PIXI.Texture.fromImage('assets/logo.png'),
+        pew: PIXI.Texture.fromImage('assets/pew.png'),
+        'pew-puff': PIXI.Texture.fromImage('assets/pew-puff.png'),
+        mine: PIXI.Texture.fromImage('assets/mine.png'),
+        'mine-trig': PIXI.Texture.fromImage('assets/mine-trig.png'),
+        'blast-hull': PIXI.Texture.fromImage('assets/blast-hull.png'),
+        'blast-shield': PIXI.Texture.fromImage('assets/blast-shield.png'),
+        enemies: {
+            horizontal: {
+                shield: PIXI.Texture.fromImage('assets/enemy1-shield.png'),
+                hull: PIXI.Texture.fromImage('assets/enemy1-hull.png')
+            },
+            sinus: {
+                shield: PIXI.Texture.fromImage('assets/enemy2-shield.png'),
+                hull: PIXI.Texture.fromImage('assets/enemy2-hull.png')
+            },
+            'mini-sinus': {
+                hull: PIXI.Texture.fromImage('assets/enemy3-hull.png')
+            }
+        }
+    }
 	
     stars = new Array(20).fill().map(() => {
         const star = new PIXI.Graphics()
@@ -110,30 +117,30 @@ function startGame() {
     topBorderIndent.drawRect(40, 18, RENDER_SIZE - 80, 8)
     stage.addChild(topBorderIndent)
 
-    waveText = new PIXI.Text('', {fontFamily : 'Press Start 2P', fontSize: 30, fill : 0xffffff})
-    waveText.prefixTimer = 180
-    waveText.position.x = 42
-    waveText.position.y = 50
-    stage.addChild(waveText)
+    guiTexts.waveText = new PIXI.Text('', {fontFamily : 'Press Start 2P', fontSize: 30, fill : 0xffffff})
+    guiTexts.waveText.prefixTimer = 180
+    guiTexts.waveText.position.x = 42
+    guiTexts.waveText.position.y = 50
+    stage.addChild(guiTexts.waveText)
 
-    playerDeathText = new PIXI.Text(playerDeaths, {fontFamily : 'Press Start 2P', fontSize: 16, fill : 0xe43b44})
-    playerDeathText.position.x = 2
-    playerDeathText.position.y = 2
-    stage.addChild(playerDeathText)
+    guiTexts.playerDeathText = new PIXI.Text(playerDeaths, {fontFamily : 'Press Start 2P', fontSize: 16, fill : 0xe43b44})
+    guiTexts.playerDeathText.position.x = 2
+    guiTexts.playerDeathText.position.y = 2
+    stage.addChild(guiTexts.playerDeathText)
 
-    enemyKillText = new PIXI.Text(enemyKills, {fontFamily : 'Press Start 2P', fontSize: 16, fill : 0x63c74d})
-    enemyKillText.anchor.set(1, 0)
-    enemyKillText.position.x = RENDER_SIZE
-    enemyKillText.position.y = 2
-    stage.addChild(enemyKillText)
+    guiTexts.enemyKillText = new PIXI.Text(enemyKills, {fontFamily : 'Press Start 2P', fontSize: 16, fill : 0x63c74d})
+    guiTexts.enemyKillText.anchor.set(1, 0)
+    guiTexts.enemyKillText.position.x = RENDER_SIZE
+    guiTexts.enemyKillText.position.y = 2
+    stage.addChild(guiTexts.enemyKillText)
 
-    highscoreText = new PIXI.Text(highscore, {fontFamily : 'Press Start 2P', fontSize: 24, fill : 0xffffff})
-    highscoreText.anchor.set(0.5, 0)
-    highscoreText.position.x = RENDER_SIZE / 2
-    highscoreText.position.y = 2
-    stage.addChild(highscoreText)
+    guiTexts.highscoreText = new PIXI.Text(highscore, {fontFamily : 'Press Start 2P', fontSize: 24, fill : 0xffffff})
+    guiTexts.highscoreText.anchor.set(0.5, 0)
+    guiTexts.highscoreText.position.x = RENDER_SIZE / 2
+    guiTexts.highscoreText.position.y = 2
+    stage.addChild(guiTexts.highscoreText)
 
-	p1Sprite = new PIXI.Sprite(p1Texture)
+	p1Sprite = new PIXI.Sprite(textures.p1)
     p1Sprite.prefixGodmode = 120
 	p1Sprite.anchor.set(0.5, 0.5)
 	p1Sprite.position.x = P1_START_X
@@ -141,7 +148,7 @@ function startGame() {
 	players.push(p1Sprite)
     stage.addChild(p1Sprite)
 
-    p2Sprite = new PIXI.Sprite(p2Texture)
+    p2Sprite = new PIXI.Sprite(textures.p2)
     p2Sprite.prefixGodmode = 120
     p2Sprite.anchor.set(0.5, 0.5)
     p2Sprite.position.x = P2_START_X
@@ -149,7 +156,7 @@ function startGame() {
 	players.push(p2Sprite)
     stage.addChild(p2Sprite)
 
-    logoContainer = new PIXI.Sprite(logoTexture)
+    logoContainer = new PIXI.Sprite(textures.logo)
     logoContainer.position.x = 30
     logoContainer.position.y = RENDER_SIZE / 4
     stage.addChild(logoContainer)
@@ -180,7 +187,7 @@ function gameloop() {
 	    	p1Sprite.position.y += 1
 	    }
 	    if (p1shoot && p1cooldown <= 0) {
-	    	const pewSprite = new PIXI.Sprite(pewTexture)
+	    	const pewSprite = new PIXI.Sprite(textures.pew)
 	    	pewSprite.anchor.set(0.5, 0.5)
 	    	pewSprite.position.x = p1Sprite.position.x
 	    	pewSprite.position.y = p1Sprite.position.y
@@ -208,7 +215,7 @@ function gameloop() {
 	    	p2Sprite.position.y += 1
 	    }
 	    if (p2shoot && p2cooldown <= 0) {
-	    	const mineSprite = new PIXI.Sprite(mineTexture)
+	    	const mineSprite = new PIXI.Sprite(textures.mine)
 	    	mineSprite.prefixActivationTimer = null
 	    	mineSprite.anchor.set(0.5, 0.5)
 	    	mineSprite.position.x = p2Sprite.position.x
@@ -256,7 +263,7 @@ function gameloop() {
 			pewHit = true
 			playerDeaths++
 
-            const ghostSprite = new PIXI.Sprite(p2Texture)
+            const ghostSprite = new PIXI.Sprite(textures.p2)
             ghostSprite.prefixTimer = 80
             ghostSprite.anchor.set(0.5, 0.5)
             ghostSprite.position.x = p2Sprite.position.x
@@ -282,13 +289,13 @@ function gameloop() {
 				if (m.prefixActivationTimer === null) {
 					m.prefixActivationTimer = 40
 					m.prefixActivationType = 'shield'
-					m.texture = mineTrigTexture
+					m.texture = textures['mine-trig']
 				}
 			}
 		})
 
     	if (pewHit || p.position.x > RENDER_SIZE) {
-            const pewPuff = new PIXI.Sprite(pewPuffTexture)
+            const pewPuff = new PIXI.Sprite(textures['pew-puff'])
             pewPuff.prefixTimer = 5
             pewPuff.anchor.set(0.5, 0.5)
             pewPuff.position.x = p.position.x
@@ -320,7 +327,7 @@ function gameloop() {
     		if (distance < 8 + 2 && m.prefixActivationTimer === null) {
     			m.prefixActivationTimer = 40
 				m.prefixActivationType = 'hull'
-				m.texture = mineTrigTexture
+				m.texture = textures['mine-trig']
     		}			
     	})
 
@@ -330,7 +337,7 @@ function gameloop() {
 		if (distance < 8 + 2 && m.prefixActivationTimer === null) {
 			m.prefixActivationTimer = 40
 			m.prefixActivationType = 'hull'
-			m.texture = mineTrigTexture
+			m.texture = textures['mine-trig']
 		}
 
 		if (m.prefixActivationTimer !== null) {
@@ -338,7 +345,7 @@ function gameloop() {
 				m.prefixDestroy = true
 				stage.removeChild(m)
 
-				const blastSprite = new PIXI.Sprite(m.prefixActivationType === 'shield' ? blastShieldTexture : blastHullTexture)
+				const blastSprite = new PIXI.Sprite(m.prefixActivationType === 'shield' ? textures['blast-shield'] : textures['blast-hull'])
 		    	blastSprite.anchor.set(0.5, 0.5)
 		    	blastSprite.prefixType = m.prefixActivationType
 		    	blastSprite.position.x = m.position.x
@@ -375,7 +382,7 @@ function gameloop() {
 			if (distance < 48 + 8) {
 				playerDeaths++
 
-                const ghostSprite = new PIXI.Sprite(player === p1Sprite ? p1Texture : p2Texture)
+                const ghostSprite = new PIXI.Sprite(player === p1Sprite ? textures.p1 : textures.p2)
                 ghostSprite.prefixTimer = 80
                 ghostSprite.anchor.set(0.5, 0.5)
                 ghostSprite.position.x = player === p1Sprite ? p1Sprite.position.x : p2Sprite.position.x
@@ -407,11 +414,11 @@ function gameloop() {
             const ghostSprite = new PIXI.Sprite()
 
             if (e.prefixType === 'horizontal') {
-                ghostSprite.texture = enemy1HullTexture
+                ghostSprite.texture = textures.enemies.horizontal.hull
             } else if (e.prefixType === 'sinus') {
-                ghostSprite.texture = enemy2HullTexture
+                ghostSprite.texture = textures.enemies.sinus.hull
             } else if (e.prefixType === 'mini-sinus') {
-                ghostSprite.texture = enemy3HullTexture
+                ghostSprite.texture = textures.enemies['mini-sinus'].hull
             }
 
             ghostSprite.prefixTimer = 40
@@ -442,7 +449,7 @@ function gameloop() {
     			stage.removeChild(e)
     			playerDeaths++
     			
-                const ghostSprite = new PIXI.Sprite(player === p1Sprite ? p1Texture : p2Texture)
+                const ghostSprite = new PIXI.Sprite(player === p1Sprite ? textures.p1 : textures.p2)
                 ghostSprite.prefixTimer = 80
                 ghostSprite.anchor.set(0.5, 0.5)
                 ghostSprite.position.x = player === p1Sprite ? p1Sprite.position.x : p2Sprite.position.x
@@ -460,17 +467,17 @@ function gameloop() {
 
     	if (e.prefixShield > 0) {
             if (e.prefixType === 'horizontal') {
-                e.texture = enemy1ShieldTexture    
+                e.texture = textures.enemies.horizontal.shield
             } else if (e.prefixType === 'sinus') {
-                e.texture = enemy2ShieldTexture    
+                e.texture = textures.enemies.sinus.shield    
             }
     	} else {
             if (e.prefixType === 'horizontal') {
-    		  e.texture = enemy1HullTexture
+    		  e.texture = textures.enemies.horizontal.hull
             } else if (e.prefixType === 'sinus') {
-              e.texture = enemy2HullTexture
+              e.texture = textures.enemies.sinus.hull
             } else if (e.prefixType === 'mini-sinus') {
-              e.texture = enemy3HullTexture
+              e.texture = textures.enemies['mini-sinus'].hull
             }
     	}
 
@@ -546,19 +553,19 @@ function gameloop() {
     blasts = blasts.filter(p => !p.prefixDestroy)
     ghosts = ghosts.filter(p => !p.prefixDestroy)
     
-    playerDeathText.text = playerDeaths
-    enemyKillText.text = enemyKills
+    guiTexts.playerDeathText.text = playerDeaths
+    guiTexts.enemyKillText.text = enemyKills
 
     spawnCounter++
 
     const MAX_ENEMIES = 5
 
-    if (waveText.prefixTimer > 0 && hasInput) {
-        waveText.prefixTimer--
-        waveText.text = 'WAVE ' + (wave + 1)
-        waveText.visible = true
+    if (guiTexts.waveText.prefixTimer > 0 && hasInput) {
+        guiTexts.waveText.prefixTimer--
+        guiTexts.waveText.text = 'WAVE ' + (wave + 1)
+        guiTexts.waveText.visible = true
     } else {
-        waveText.visible = false
+        guiTexts.waveText.visible = false
     }
 
     if (spawnCounter > 100 && waveCounter < MAX_ENEMIES && hasInput) {
@@ -592,11 +599,11 @@ function gameloop() {
     if (waveCounter >= MAX_ENEMIES && enemies.length === 0) {
     	waveCounter = 0
         wave++
-        waveText.prefixTimer = 180
+        guiTexts.waveText.prefixTimer = 180
     }
 
     highscore = enemyKills * 1000 - playerDeaths * 5000
-    highscoreText.text = highscore
+    guiTexts.highscoreText.text = highscore
 
     if (hasInput) {
         logoContainer.visible = false
