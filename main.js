@@ -1,10 +1,26 @@
 
 let textures,
-    p1Sprite, p1up, p1down, p1left, p1right, p1shoot, p1cooldown,
-	p2Sprite, p2up, p2down, p2left, p2right, p2shoot, p2cooldown,
-    counter, pews, pewPuffs, mines, enemies, ghosts, enemyKills,
-    playerDeaths, spawnCounter, hasInput, logoContainer, stars,
-    waveCounter, wave
+    pews, pewPuffs, mines, enemies, ghosts, stars,
+    logoContainer, p1Sprite, p2Sprite, p1cooldown, p2cooldown,
+    enemyKills, playerDeaths, wave,
+    counter, spawnCounter, waveCounter, hasInput 
+
+const controls = {
+    p1: {
+        up: false,
+        down: false,
+        left: false,
+        right: false,
+        shoot: false
+    },
+    p2: {
+        up: false,
+        down: false,
+        left: false,
+        right: false,
+        shoot: false
+    }
+}
 
 const guiTexts = {}
 
@@ -174,19 +190,19 @@ function gameloop() {
     } 
 
     if (players.find(p => p === p1Sprite)) {
-	    if (p1left) {
+	    if (controls.p1.left) {
 	    	p1Sprite.position.x -= 1
 	    }
-	    if (p1right) {
+	    if (controls.p1.right) {
 	    	p1Sprite.position.x += 1
 	    }
-	    if (p1up) {
+	    if (controls.p1.up) {
 	    	p1Sprite.position.y -= 1
 	    }
-	    if (p1down) {
+	    if (controls.p1.down) {
 	    	p1Sprite.position.y += 1
 	    }
-	    if (p1shoot && p1cooldown <= 0) {
+	    if (controls.p1.shoot && p1cooldown <= 0) {
 	    	const pewSprite = new PIXI.Sprite(textures.pew)
 	    	pewSprite.anchor.set(0.5, 0.5)
 	    	pewSprite.position.x = p1Sprite.position.x
@@ -202,19 +218,19 @@ function gameloop() {
 	}
 
     if (players.find(p => p === p2Sprite)) {
-	    if (p2left) {
+	    if (controls.p2.left) {
 	    	p2Sprite.position.x -= 1
 	    }
-	    if (p2right) {
+	    if (controls.p2.right) {
 	    	p2Sprite.position.x += 1
 	    }
-	    if (p2up) {
+	    if (controls.p2.up) {
 	    	p2Sprite.position.y -= 1
 	    }
-	    if (p2down) {
+	    if (controls.p2.down) {
 	    	p2Sprite.position.y += 1
 	    }
-	    if (p2shoot && p2cooldown <= 0) {
+	    if (controls.p2.shoot && p2cooldown <= 0) {
 	    	const mineSprite = new PIXI.Sprite(textures.mine)
 	    	mineSprite.prefixActivationTimer = null
 	    	mineSprite.anchor.set(0.5, 0.5)
@@ -616,69 +632,69 @@ window.addEventListener('keydown', e => {
     hasInput = true
 
 	if (e.keyCode === 68) {
-		p1right = true
+		controls.p1.right = true
 	}
 	if (e.keyCode === 65) {
-		p1left = true
+		controls.p1.left = true
 	}
 	if (e.keyCode === 87) {
-		p1up = true
+		controls.p1.up = true
 	}
 	if (e.keyCode === 83) {
-		p1down = true
+		controls.p1.down = true
 	}
 	if (e.keyCode === 32) {
-		p1shoot = true
+		controls.p1.shoot = true
 	}
 
 	if (e.keyCode === 39) {
-		p2right = true
+		controls.p2.right = true
 	}
 	if (e.keyCode === 37) {
-		p2left = true
+		controls.p2.left = true
 	}
 	if (e.keyCode === 38) {
-		p2up = true
+		controls.p2.up = true
 	}
 	if (e.keyCode === 40) {
-		p2down = true
+		controls.p2.down = true
 	}
 	if (e.keyCode === 13) {
-		p2shoot = true
+		controls.p2.shoot = true
 	}
 })
 
 window.addEventListener('keyup', e => {
 	if (e.keyCode === 68) {
-		p1right = false
+		controls.p1.right = false
 	}
 	if (e.keyCode === 65) {
-		p1left = false
+		controls.p1.left = false
 	}
 	if (e.keyCode === 87) {
-		p1up = false
+		controls.p1.up = false
 	}
 	if (e.keyCode === 83) {
-		p1down = false
+		controls.p1.down = false
 	}
 	if (e.keyCode === 32) {
-		p1shoot = false
+		controls.p1.shoot = false
 	}
 
 	if (e.keyCode === 39) {
-		p2right = false
+		controls.p2.right = false
 	}
 	if (e.keyCode === 37) {
-		p2left = false
+		controls.p2.left = false
 	}
 	if (e.keyCode === 38) {
-		p2up = false
+		controls.p2.up = false
 	}
 	if (e.keyCode === 40) {
-		p2down = false
+		controls.p2.down = false
 	}
 	if (e.keyCode === 13) {
-		p2shoot = false
+		controls.p2.shoot = false
 	}
 })
 
