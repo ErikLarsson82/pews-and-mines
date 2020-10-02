@@ -33,6 +33,19 @@ const P2_START_X = 12
 const P1_START_Y = RENDER_SIZE / 2
 const P2_START_Y = RENDER_SIZE / 2 + 20
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 const config = {
     antialias: false,
     transparent: false,
@@ -62,6 +75,19 @@ PIXI.loader.add('assets/blast-hull.png')
 PIXI.loader.add('assets/blast-shield.png')
 PIXI.loader.add('assets/logo.png')
 PIXI.loader.load(startGame)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function startGame() {
     counter = 0
@@ -176,6 +202,25 @@ function startGame() {
     gameloop()
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function gameloop() {
     requestAnimationFrame(gameloop)
 
@@ -184,6 +229,21 @@ function gameloop() {
     if (counter > 120) {
     	counter = 0
     } 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // tick p1
     if (players.find(p => p === p1Sprite)) {
@@ -215,6 +275,21 @@ function gameloop() {
 	    }
 	}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // tick p2
     if (players.find(p => p === p2Sprite)) {
 	    if (controls.p2.left) {
@@ -245,6 +320,18 @@ function gameloop() {
 	    	p2cooldown = p2cooldown - 1
 	    }
 	}
+
+
+
+
+
+
+
+
+
+
+
+
 
     // tick pews
     pews.forEach(pew => {
@@ -330,6 +417,16 @@ function gameloop() {
     	} 
     })
 
+
+
+
+
+
+
+
+
+
+
     // tick pewpuffs
     pewPuffs.forEach(pewpuff => {
         pewpuff.prefixTimer--
@@ -339,6 +436,21 @@ function gameloop() {
             stage.removeChild(pewpuff)
         }
     })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // tick mines
     mines.forEach(mine => {
@@ -391,6 +503,20 @@ function gameloop() {
 	    }
     })
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // tick blasts
     blasts.forEach(blast => {
 
@@ -442,6 +568,20 @@ function gameloop() {
     		stage.removeChild(blast)
     	}
     }) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // tick enemies
     enemies.forEach(enemy => {
@@ -538,6 +678,17 @@ function gameloop() {
     	}
     })
 
+
+
+
+
+
+
+
+
+
+
+
     // tick players
     players.forEach(player => {
         if (player.prefixGodmode >= 0) {
@@ -566,6 +717,17 @@ function gameloop() {
 
     })
 
+
+
+
+
+
+
+
+
+
+
+
     // tick ghosts
     ghosts.forEach(ghost => {
         ghost.prefixTimer--
@@ -578,6 +740,10 @@ function gameloop() {
         }
     })
 
+
+
+
+
     // tick stars
     stars.forEach(star => {
         star.position.x -= 0.1
@@ -586,6 +752,14 @@ function gameloop() {
             star.position.x = RENDER_SIZE
         }
     })
+
+
+
+
+
+
+
+
 
     pews = pews.filter(x => !x.prefixDestroy)
     pewPuffs = pewPuffs.filter(x => !x.prefixDestroy)
@@ -596,6 +770,16 @@ function gameloop() {
     
     guiTexts.playerDeathText.text = playerDeaths
     guiTexts.enemyKillText.text = enemyKills
+
+
+
+
+
+
+
+
+
+
 
     spawnCounter++
 
@@ -650,6 +834,23 @@ function gameloop() {
 
     renderer.render(stage)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 window.addEventListener('keydown', e => {
     hasInput = true
