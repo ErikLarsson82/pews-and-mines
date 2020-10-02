@@ -1,6 +1,6 @@
 
 let textures,
-    pews, pewPuffs, mines, enemies, ghosts, stars,
+    pews, pewPuffs, mines, enemies, ghosts, stars, powerups,
     logoContainer, p1Sprite, p2Sprite, p1cooldown, p2cooldown,
     enemyKills, playerDeaths, wave,
     counter, spawnCounter, waveCounter, hasInput 
@@ -74,6 +74,7 @@ PIXI.loader.add('assets/mine-trig.png')
 PIXI.loader.add('assets/blast-hull.png')
 PIXI.loader.add('assets/blast-shield.png')
 PIXI.loader.add('assets/logo.png')
+PIXI.loader.add('assets/powerup.png')
 PIXI.loader.load(startGame)
 
 
@@ -115,6 +116,7 @@ function startGame() {
     enemies = []
     players = []
     ghosts = []
+    powerups = []
 
     textures = {
         p1: PIXI.Texture.fromImage('assets/player-1.png'),
@@ -144,6 +146,13 @@ function startGame() {
         stage.addChild(star)
         return star
     })
+
+    const powerup = new PIXI.Sprite(PIXI.Texture.fromImage('assets/powerup.png'))
+    powerup.anchor.set(0.5, 0.5)
+    powerup.position.x = 30
+    powerup.position.y = 30
+    powerups.push(powerup)
+    stage.addChild(powerup)
 
     const topBorder = new PIXI.Graphics()
     topBorder.beginFill(0x262b44)
@@ -230,22 +239,7 @@ function gameloop() {
     	counter = 0
     } 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // tick p1
+    // tick p1 ----------------------------------------------------------------------
     if (players.find(p => p === p1Sprite)) {
 	    if (controls.p1.left) {
 	    	p1Sprite.position.x -= 1
@@ -275,22 +269,7 @@ function gameloop() {
 	    }
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // tick p2
+    // tick p2 ----------------------------------------------------------------------
     if (players.find(p => p === p2Sprite)) {
 	    if (controls.p2.left) {
 	    	p2Sprite.position.x -= 1
@@ -321,19 +300,7 @@ function gameloop() {
 	    }
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-    // tick pews
+    // tick pews ----------------------------------------------------------------------
     pews.forEach(pew => {
     	pew.position.x = pew.position.x + 2
 
@@ -417,17 +384,7 @@ function gameloop() {
     	} 
     })
 
-
-
-
-
-
-
-
-
-
-
-    // tick pewpuffs
+    // tick pewpuffs ----------------------------------------------------------------------
     pewPuffs.forEach(pewpuff => {
         pewpuff.prefixTimer--
 
@@ -437,22 +394,7 @@ function gameloop() {
         }
     })
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // tick mines
+    // tick mines ----------------------------------------------------------------------
     mines.forEach(mine => {
     	
     	enemies.forEach(enemy => {
@@ -503,21 +445,7 @@ function gameloop() {
 	    }
     })
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // tick blasts
+    // tick blasts ----------------------------------------------------------------------
     blasts.forEach(blast => {
 
     	enemies.forEach(enemy => {
@@ -569,21 +497,7 @@ function gameloop() {
     	}
     }) 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // tick enemies
+    // tick enemies ----------------------------------------------------------------------
     enemies.forEach(enemy => {
     	if (enemy.prefixHull <= 0) {
     		enemyKills++
@@ -678,18 +592,7 @@ function gameloop() {
     	}
     })
 
-
-
-
-
-
-
-
-
-
-
-
-    // tick players
+    // tick players ----------------------------------------------------------------------
     players.forEach(player => {
         if (player.prefixGodmode >= 0) {
             player.prefixGodmode--
@@ -717,18 +620,7 @@ function gameloop() {
 
     })
 
-
-
-
-
-
-
-
-
-
-
-
-    // tick ghosts
+    // tick ghosts ----------------------------------------------------------------------
     ghosts.forEach(ghost => {
         ghost.prefixTimer--
 
@@ -740,11 +632,7 @@ function gameloop() {
         }
     })
 
-
-
-
-
-    // tick stars
+    // tick stars ----------------------------------------------------------------------
     stars.forEach(star => {
         star.position.x -= 0.1
 
@@ -753,11 +641,23 @@ function gameloop() {
         }
     })
 
+    // tick powerups ----------------------------------------------------------------------
+    powerups.forEach(powerup => {
+        powerup.position.y = powerup.position.y + Math.sin(counter) / 20
 
-
-
-
-
+        players.forEach(player => {
+            const dx = powerup.position.x - player.position.x
+            const dy = powerup.position.y - player.position.y
+            const distance = Math.sqrt(dx * dx + dy * dy)
+            
+            // collision powerup - player
+            if (distance < 8 + 2) {
+                powerup.prefixDestroy = true
+                stage.removeChild(powerup)
+            }    
+        })
+        
+    })
 
 
 
@@ -767,17 +667,10 @@ function gameloop() {
     mines = mines.filter(x => !x.prefixDestroy)
     blasts = blasts.filter(x => !x.prefixDestroy)
     ghosts = ghosts.filter(x => !x.prefixDestroy)
+    powerups = powerups.filter(x => !x.prefixDestroy)
     
     guiTexts.playerDeathText.text = playerDeaths
     guiTexts.enemyKillText.text = enemyKills
-
-
-
-
-
-
-
-
 
 
 
