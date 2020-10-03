@@ -75,6 +75,7 @@ PIXI.loader.add('assets/blast-hull.png')
 PIXI.loader.add('assets/blast-shield.png')
 PIXI.loader.add('assets/logo.png')
 PIXI.loader.add('assets/powerup.png')
+PIXI.loader.add('assets/companion.png')
 PIXI.loader.load(startGame)
 
 
@@ -117,6 +118,7 @@ function startGame() {
     players = []
     ghosts = []
     powerups = []
+    companions = []
 
     textures = {
         p1: PIXI.Texture.fromImage('assets/player-1.png'),
@@ -617,7 +619,6 @@ function gameloop() {
             player.position.x = 15
         }
 
-
     })
 
     // tick ghosts ----------------------------------------------------------------------
@@ -654,9 +655,23 @@ function gameloop() {
             if (distance < 8 + 2) {
                 powerup.prefixDestroy = true
                 stage.removeChild(powerup)
+
+                const companion = new PIXI.Sprite(PIXI.Texture.fromImage('assets/companion.png'))
+                companion.prefixFollowingPlayer = player
+                companion.anchor.set(0.5, 0.5)
+                companion.position.x = player.position.x
+                companion.position.y = player.position.y
+                stage.addChild(companion)
+                companions.push(companion)
             }    
         })
         
+    })
+
+    // companion powerups ----------------------------------------------------------------------
+    companions.forEach(companion => {
+        companion.position.x += (companion.prefixFollowingPlayer.position.x - companion.position.x + 25) * 0.02
+        companion.position.y += (companion.prefixFollowingPlayer.position.y - companion.position.y) * 0.02
     })
 
 
