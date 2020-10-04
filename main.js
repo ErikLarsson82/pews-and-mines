@@ -360,11 +360,11 @@ function gameloop() {
 
             // collision pew - mine
 			if (distance < 2 + 2 + 2) {
-				pewHit = true				
+				pewHit = true
+                mine.prefixActivationType = 'shield'
 
 				if (mine.prefixActivationTimer === null) {
 					mine.prefixActivationTimer = 40
-					mine.prefixActivationType = 'shield'
 					mine.texture = textures['mine-trig']
 				}
 			}
