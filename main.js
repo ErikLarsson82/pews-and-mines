@@ -290,6 +290,7 @@ function gameloop() {
 	    	mineSprite.anchor.set(0.5, 0.5)
 	    	mineSprite.position.x = p2Sprite.position.x
 	    	mineSprite.position.y = p2Sprite.position.y
+            mineSprite.prefixVx = 3
 	    	stage.addChild(mineSprite)
 	    	mines.push(mineSprite)
 	    	p2cooldown = 80
@@ -396,6 +397,15 @@ function gameloop() {
 
     // tick mines ----------------------------------------------------------------------
     mines.forEach(mine => {
+
+        mine.position.x += mine.prefixVx
+        mine.prefixVx -= 0.1
+        if (mine.prefixVx < 0) {
+            mine.prefixVx = 0
+        }
+        const dx = mine.position.x - p1Sprite.position.x
+        const dy = mine.position.y - p1Sprite.position.y
+        const distance = Math.sqrt(dx * dx + dy * dy)
     	
     	enemies.forEach(enemy => {
     		const dx = mine.position.x - enemy.position.x
@@ -409,10 +419,6 @@ function gameloop() {
 				mine.texture = textures['mine-trig']
     		}			
     	})
-
-    	const dx = mine.position.x - p1Sprite.position.x
-		const dy = mine.position.y - p1Sprite.position.y
-		const distance = Math.sqrt(dx * dx + dy * dy)
 
         // collision mine - p1
 		if (distance < 8 + 2 && mine.prefixActivationTimer === null) {
