@@ -257,7 +257,7 @@ function gameloop() {
             // create pew
 	    	const pewSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/pew.png'))
 	    	pewSprite.anchor.set(0.5, 0.5)
-	    	pewSprite.position.x = p1Sprite.position.x
+	    	pewSprite.position.x = p1Sprite.position.x + 8
 	    	pewSprite.position.y = p1Sprite.position.y
 	    	stage.addChild(pewSprite)
 	    	pews.push(pewSprite)
