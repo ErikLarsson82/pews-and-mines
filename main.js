@@ -3,7 +3,7 @@ let textures,
     pews, pewPuffs, mines, mineBlips, enemies, ghosts, stars, powerups,
     logoContainer, p1Sprite, p2Sprite, p1cooldown, p2cooldown,
     enemyKills, playerDeaths, wave,
-    counter, spawnCounter, waveCounter, hasInput 
+    counter, tick, spawnCounter, waveCounter, hasInput 
 
 const controls = {
     p1: {
@@ -94,6 +94,7 @@ PIXI.loader.load(startGame)
 
 
 function startGame() {
+    tick = 0
     counter = 0
 
     spawnCounter = 0
@@ -238,6 +239,7 @@ function startGame() {
 function gameloop() {
     requestAnimationFrame(gameloop)
 
+    tick += 1
     counter = counter + 0.01
 
     if (counter > 120) {
@@ -607,6 +609,10 @@ function gameloop() {
                 player.prefixGodmode = 120
     		}
 		})
+
+        if (enemy.prefixShieldSprite && tick % 4 > 2) {
+            enemy.prefixShieldSprite.scale.x *= -1
+        }
 
         if (enemy.prefixShield <= 0 && enemy.prefixShieldSprite) {
             enemy.removeChild(enemy.prefixShieldSprite)
