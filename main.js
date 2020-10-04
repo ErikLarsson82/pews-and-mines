@@ -710,7 +710,7 @@ function tickEntities(child) {
                     const rocketSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/enemy-rocket.png'))
                     rocketSprite.prefixObject = 'rocket'
                     rocketSprite.anchor.set(0.5, 0.5)
-                    rocketSprite.position.x = enemy.position.x - 8
+                    rocketSprite.position.x = enemy.position.x - 10
                     rocketSprite.position.y = enemy.position.y
                     rocketSprite.prefixDy = 1
                     if (rocketSprite.position.y < RENDER_SIZE / 2) {
@@ -791,15 +791,18 @@ function tickEntities(child) {
             rocket.position.x -= speed
             rocket.position.y += rocket.prefixDy * speed
 
-            // collision rocket - player AND
-            // collision rocket - enemies
-            const playersAndEnemies = stage.children.filter(({prefixObject}) => prefixObject === 'p1' || prefixObject === 'p2' || prefixObject === 'enemy')
-            playersAndEnemies.forEach(entity => {
+            // collision rocket
+            stage.children.filter(({prefixObject}) => prefixObject === 'p1' ||
+                    prefixObject === 'p2' ||
+                    prefixObject === 'mine' ||
+                    prefixObject === 'pew' ||
+                    prefixObject === 'enemy' ||
+                    prefixObject === 'blast').forEach(entity => {
                 const dx = rocket.position.x - entity.position.x
                 const dy = rocket.position.y - entity.position.y
                 const distance = Math.sqrt(dx * dx + dy * dy)
 
-                if (distance < 8) {
+                if (distance < (rocket.width / 2 + entity.width) / 2) {
                     const blastSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/enemy-blast.png'))
                     blastSprite.prefixObject = 'blast'
                     blastSprite.anchor.set(0.5, 0.5)
@@ -808,7 +811,7 @@ function tickEntities(child) {
                     blastSprite.position.y = rocket.position.y
                     blastSprite.prefixTimer = 30
                     stage.addChild(blastSprite)
-                    
+
                     rocket.prefixDestroy = true
                     stage.removeChild(rocket)
                 }
