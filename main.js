@@ -70,7 +70,8 @@ PIXI.loader.add('assets/enemy3-hull.png')
 PIXI.loader.add('assets/pew.png')
 PIXI.loader.add('assets/pew-puff.png')
 PIXI.loader.add('assets/mine.png')
-PIXI.loader.add('assets/mine-trig.png')
+PIXI.loader.add('assets/mine-trig-hull.png')
+PIXI.loader.add('assets/mine-trig-shield.png')
 PIXI.loader.add('assets/blast-hull.png')
 PIXI.loader.add('assets/blast-shield.png')
 PIXI.loader.add('assets/logo.png')
@@ -121,7 +122,8 @@ function startGame() {
     textures = {
         p1: PIXI.Texture.fromImage('assets/player-1.png'),
         p2: PIXI.Texture.fromImage('assets/player-2.png'),
-        'mine-trig': PIXI.Texture.fromImage('assets/mine-trig.png'),
+        'mine-trig-hull': PIXI.Texture.fromImage('assets/mine-trig-hull.png'),
+        'mine-trig-shield': PIXI.Texture.fromImage('assets/mine-trig-shield.png'),
         enemies: {
             horizontal: {
                 shield: PIXI.Texture.fromImage('assets/enemy1-shield.png'),
@@ -365,7 +367,6 @@ function gameloop() {
 
 				if (mine.prefixActivationTimer === null) {
 					mine.prefixActivationTimer = 40
-					mine.texture = textures['mine-trig']
 				}
 			}
 		})
@@ -413,7 +414,6 @@ function gameloop() {
     		if (distance < 8 + 2 && mine.prefixActivationTimer === null) {
     			mine.prefixActivationTimer = 40
 				mine.prefixActivationType = 'hull'
-				mine.texture = textures['mine-trig']
     		}			
     	})
 
@@ -426,7 +426,6 @@ function gameloop() {
             if (distance < 8 + 2 && mine.prefixActivationTimer === null) {
                 mine.prefixActivationTimer = 40
                 mine.prefixActivationType = 'hull'
-                mine.texture = textures['mine-trig']
             }
         })
 
@@ -439,13 +438,13 @@ function gameloop() {
             if (distance < 48 && mine.prefixActivationTimer === null) {
                 mine.prefixActivationTimer = 60
                 mine.prefixActivationType = blast.prefixType
-                mine.texture = textures['mine-trig']
             }
 
         })
 
 		if (mine.prefixActivationTimer !== null) {
             mine.prefixVx = 0
+            mine.texture = textures['mine-trig-' + mine.prefixActivationType]
 			if (mine.prefixActivationTimer <= 0) {
 				mine.prefixDestroy = true
 				stage.removeChild(mine)
