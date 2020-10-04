@@ -1,6 +1,6 @@
 
 let textures,
-    pews, pewPuffs, mines, enemies, ghosts, stars, powerups,
+    pews, pewPuffs, mines, mineBlips, enemies, ghosts, stars, powerups,
     logoContainer, p1Sprite, p2Sprite, p1cooldown, p2cooldown,
     enemyKills, playerDeaths, wave,
     counter, spawnCounter, waveCounter, hasInput 
@@ -72,6 +72,7 @@ PIXI.loader.add('assets/pew-puff.png')
 PIXI.loader.add('assets/mine.png')
 PIXI.loader.add('assets/mine-trig-hull.png')
 PIXI.loader.add('assets/mine-trig-shield.png')
+PIXI.loader.add('assets/mine-blip.png')
 PIXI.loader.add('assets/blast-hull.png')
 PIXI.loader.add('assets/blast-shield.png')
 PIXI.loader.add('assets/logo.png')
@@ -113,6 +114,7 @@ function startGame() {
     pews = []
     pewPuffs = []
     mines = []
+    mineBlips = []
     blasts = []
     enemies = []
     players = []
@@ -442,6 +444,19 @@ function gameloop() {
 
         })
 
+        // create blip
+        if (mine.prefixActivationTimer !== null && mine.prefixBlip !== true) {
+            const mineBlip = new PIXI.Sprite(PIXI.Texture.fromImage('assets/mine-blip.png'))
+            mineBlip.prefixTimer = mine.prefixActivationTimer
+            mineBlip.anchor.set(0.5, 0.5)
+            mineBlip.position.x = mine.position.x
+            mineBlip.position.y = mine.position.y
+            mineBlips.push(mineBlip)
+            stage.addChild(mineBlip)
+
+            mine.prefixBlip = true
+        }
+
 		if (mine.prefixActivationTimer !== null) {
             mine.prefixVx = 0
             mine.texture = textures['mine-trig-' + mine.prefixActivationType]
@@ -466,6 +481,22 @@ function gameloop() {
 	    		mine.prefixActivationTimer--
 	    	}
 	    }
+    })
+
+    // tick mine blips ----------------------------------------------------------------------
+    mineBlips.forEach(mineBlip => {
+        mineBlip.prefixTimer--
+
+        if (mineBlip.prefixTimer % 8 < 4) {
+            mineBlip.visible = true
+        } else {
+            mineBlip.visible = false
+        }
+
+        if (mineBlip.prefixTimer <= 0) {
+            mineBlip.prefixDestroy = true
+            stage.removeChild(mineBlip)
+        }
     })
 
     // tick blasts ----------------------------------------------------------------------
