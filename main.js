@@ -61,9 +61,7 @@ renderer.backgroundColor = 0x181425
 
 PIXI.loader.add('assets/player-1.png')
 PIXI.loader.add('assets/player-2.png')
-PIXI.loader.add('assets/enemy1-shield.png')
 PIXI.loader.add('assets/enemy1-hull.png')
-PIXI.loader.add('assets/enemy2-shield.png')
 PIXI.loader.add('assets/enemy2-hull.png')
 PIXI.loader.add('assets/enemy3-hull.png')
 PIXI.loader.add('assets/enemy-shield.png')
@@ -115,11 +113,9 @@ function startGame() {
         'mine-trig-shield': PIXI.Texture.fromImage('assets/mine-trig-shield.png'),
         enemies: {
             horizontal: {
-                shield: PIXI.Texture.fromImage('assets/enemy1-shield.png'),
                 hull: PIXI.Texture.fromImage('assets/enemy1-hull.png')
             },
             sinus: {
-                shield: PIXI.Texture.fromImage('assets/enemy2-shield.png'),
                 hull: PIXI.Texture.fromImage('assets/enemy2-hull.png')
             },
             'mini-sinus': {
