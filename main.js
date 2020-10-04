@@ -514,6 +514,8 @@ function gameloop() {
     	})
 
     	blast.prefixTimer = blast.prefixTimer - 1
+        blast.position.x += Math.cos(counter * 800)
+        blast.position.y += Math.sin(counter * 800)
 
     	if (blast.prefixTimer <= 0) {
     		blast.prefixDestroy = true
