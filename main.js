@@ -277,7 +277,7 @@ function animationLoop() {
 	    stage.addChild(enemy)
     }
 
-    if (waveCounter >= ENEMIES_PER_WAVE && stage.children.filter(({prefixObject}) => prefixObject === 'enemy').length === 0) {
+    if (waveCounter >= ENEMIES_PER_WAVE && getObjects(['enemy']).length === 0) {
     	waveCounter = 0
         wave++
         guiTexts.waveText.prefixTimer = 180
@@ -306,6 +306,10 @@ function isCollision(sprite1, sprite2, optCollisionDistance) {
     return distance < collisionDistance
 }
 
+function getObjects(prefixObjectsArr) {
+    return stage.children.filter(({prefixObject}) => prefixObjectsArr.includes(prefixObject))
+}
+
 
 
 function tickEntities(child) {
@@ -317,7 +321,7 @@ function tickEntities(child) {
 
             let pewHit = false
 
-            stage.children.filter(({prefixObject}) => prefixObject === 'enemy').forEach(enemy => {
+            getObjects(['enemy']).forEach(enemy => {
 
                 // collision pew - enemy
                 if (isCollision(pew, enemy)) {
@@ -356,7 +360,7 @@ function tickEntities(child) {
                 p2Sprite.position.y = P2_START_Y            
             }
 
-            stage.children.filter(({prefixObject}) => prefixObject === 'mine').forEach(mine => {
+            getObjects(['mine']).forEach(mine => {
 
                 // collision pew - mine
                 if (isCollision(pew, mine, 6)) {
@@ -492,7 +496,7 @@ function tickEntities(child) {
             }
             
             // collision mine - enemy
-            stage.children.filter(({prefixObject}) => prefixObject === 'enemy').forEach(enemy => {
+            getObjects(['enemy']).forEach(enemy => {
 
                 if (isCollision(mine, enemy) && mine.prefixActivationTimer === null) {
                     mine.prefixActivationTimer = 40
@@ -501,7 +505,7 @@ function tickEntities(child) {
             })
 
             // collision mine - player
-            stage.children.filter(({prefixObject}) => prefixObject === 'p1' || prefixObject === 'p2').forEach(player => {
+            getObjects(['p1', 'p2']).forEach(player => {
 
                 if (isCollision(mine, player) && mine.prefixActivationTimer === null) {
                     mine.prefixActivationTimer = 40
@@ -510,7 +514,7 @@ function tickEntities(child) {
             })
 
             // collision mine - blast
-            stage.children.filter(({prefixObject}) => prefixObject === 'blast').forEach(blast => {
+            getObjects(['blast']).forEach(blast => {
 
                 if (isCollision(mine, blast) && mine.prefixActivationTimer === null) {
                     mine.prefixActivationTimer = 60
@@ -581,7 +585,7 @@ function tickEntities(child) {
             const blast = child
 
             // collision blast - enemy
-            stage.children.filter(({prefixObject}) => prefixObject === 'enemy').forEach(enemy => {
+            getObjects(['enemy']).forEach(enemy => {
                 if (isCollision(blast, enemy)) {
                     if (blast.prefixType === 'shield') {
                         enemy.prefixShield = 0
@@ -592,7 +596,7 @@ function tickEntities(child) {
             })
 
             // collision blast - players
-            stage.children.filter(({prefixObject}) => prefixObject === 'p1' || prefixObject === 'p2').forEach(player => {
+            getObjects(['p1', 'p2']).forEach(player => {
                 if (isCollision(blast, player)) {
                     playerDeaths++
 
@@ -649,7 +653,7 @@ function tickEntities(child) {
             }
 
             // collision enemy - players
-            stage.children.filter(({prefixObject}) => prefixObject === 'p1' || prefixObject === 'p2').forEach(player => {
+            getObjects(['p1', 'p2']).forEach(player => {
                 if (isCollision(enemy, player)) {
                     enemy.prefixDestroy = true
                     stage.removeChild(enemy)
@@ -750,7 +754,7 @@ function tickEntities(child) {
             powerup.position.y = powerup.position.y + Math.sin(counter) / 20
 
             // collision powerup - player
-            stage.children.filter(({prefixObject}) => prefixObject === 'p1' || prefixObject === 'p2').forEach(player => {
+            getObjects(['p1', 'p2']).forEach(player => {
                 if (isCollision(powerup, player)) {
                     powerup.prefixDestroy = true
                     stage.removeChild(powerup)
@@ -767,13 +771,7 @@ function tickEntities(child) {
             rocket.position.y += rocket.prefixDy * speed
 
             // collision rocket
-            stage.children.filter(({prefixObject}) =>
-                prefixObject === 'p1' ||
-                prefixObject === 'p2' ||
-                prefixObject === 'mine' ||
-                prefixObject === 'pew' ||
-                prefixObject === 'enemy' ||
-                prefixObject === 'blast').forEach(entity => {
+            getObjects(['p1', 'p2', 'mine', 'pew', 'enemy', 'blast']).forEach(entity => {
                 if (isCollision(rocket, entity, (rocket.width / 2 + entity.width) / 2)) {
                     const blastSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/enemy-blast.png'))
                     blastSprite.prefixObject = 'blast'
