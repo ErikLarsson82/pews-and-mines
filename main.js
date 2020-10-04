@@ -2,7 +2,7 @@
 let textures,
     logoContainer, p1Sprite, p2Sprite, p1cooldown, p2cooldown,
     enemyKills, playerDeaths, wave,
-    counter, spawnCounter, waveCounter, hasInput 
+    counter, tick, spawnCounter, waveCounter, hasInput 
 
 const controls = {
     p1: {
@@ -87,6 +87,7 @@ PIXI.loader.load(startGame)
 
 
 function startGame() {
+    tick = 0
     counter = 0
 
     spawnCounter = 0
@@ -196,7 +197,7 @@ function startGame() {
     logoContainer.position.y = RENDER_SIZE / 4
     stage.addChild(logoContainer)
 
-    gameloop()
+    animationLoop()
 }
 
 
@@ -207,16 +208,17 @@ function startGame() {
 
 
 
-function gameloop() {
-    requestAnimationFrame(gameloop)
+function animationLoop() {
+    requestAnimationFrame(animationLoop)
 
+    tick += 1
     counter = counter + 0.01
 
     if (counter > 120) {
     	counter = 0
     }
 
-    stage.children.forEach(tick)
+    stage.children.forEach(tickEntities)
 
     stage.children.forEach(child => child.prefixDestroy && stage.removeChild(child))
 
@@ -295,7 +297,7 @@ function gameloop() {
 
 
 
-function tick(child) {
+function tickEntities(child) {
     switch (child.prefixObject) {
         case 'pew':
             const pew = child
@@ -687,6 +689,10 @@ function tick(child) {
                     player.prefixGodmode = 120
                 }
             })
+
+            if (enemy.prefixShieldSprite && tick % 4 > 2) {
+                enemy.prefixShieldSprite.scale.x *= -1
+            }
 
             if (enemy.prefixShield <= 0 && enemy.prefixShieldSprite) {
                 enemy.removeChild(enemy.prefixShieldSprite)
