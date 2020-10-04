@@ -430,6 +430,20 @@ function gameloop() {
             }
         })
 
+        // collision mine - blast
+        blasts.forEach(blast => {
+            const dx = mine.position.x - blast.position.x
+            const dy = mine.position.y - blast.position.y
+            const distance = Math.sqrt(dx * dx + dy * dy)
+
+            if (distance < 48 && mine.prefixActivationTimer === null) {
+                mine.prefixActivationTimer = 60
+                mine.prefixActivationType = blast.prefixType
+                mine.texture = textures['mine-trig']
+            }
+
+        })
+
 		if (mine.prefixActivationTimer !== null) {
             mine.prefixVx = 0
 			if (mine.prefixActivationTimer <= 0) {
