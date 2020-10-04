@@ -288,7 +288,7 @@ function gameloop() {
 	    	const mineSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/mine.png'))
 	    	mineSprite.prefixActivationTimer = null
 	    	mineSprite.anchor.set(0.5, 0.5)
-	    	mineSprite.position.x = p2Sprite.position.x
+	    	mineSprite.position.x = p2Sprite.position.x + 8
 	    	mineSprite.position.y = p2Sprite.position.y
             mineSprite.prefixVx = 3
 	    	stage.addChild(mineSprite)
@@ -403,9 +403,6 @@ function gameloop() {
         if (mine.prefixVx < 0) {
             mine.prefixVx = 0
         }
-        const dx = mine.position.x - p1Sprite.position.x
-        const dy = mine.position.y - p1Sprite.position.y
-        const distance = Math.sqrt(dx * dx + dy * dy)
     	
     	enemies.forEach(enemy => {
     		const dx = mine.position.x - enemy.position.x
@@ -420,12 +417,18 @@ function gameloop() {
     		}			
     	})
 
-        // collision mine - p1
-		if (distance < 8 + 2 && mine.prefixActivationTimer === null) {
-			mine.prefixActivationTimer = 40
-			mine.prefixActivationType = 'hull'
-			mine.texture = textures['mine-trig']
-		}
+        // collision mine - player
+        players.forEach(player => {
+            const dx = mine.position.x - player.position.x
+            const dy = mine.position.y - player.position.y
+            const distance = Math.sqrt(dx * dx + dy * dy)
+
+            if (distance < 8 + 2 && mine.prefixActivationTimer === null) {
+                mine.prefixActivationTimer = 40
+                mine.prefixActivationType = 'hull'
+                mine.texture = textures['mine-trig']
+            }
+        })
 
 		if (mine.prefixActivationTimer !== null) {
 			if (mine.prefixActivationTimer <= 0) {
