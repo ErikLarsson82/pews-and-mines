@@ -67,6 +67,7 @@ PIXI.loader.add('assets/enemy1-hull.png')
 PIXI.loader.add('assets/enemy2-shield.png')
 PIXI.loader.add('assets/enemy2-hull.png')
 PIXI.loader.add('assets/enemy3-hull.png')
+PIXI.loader.add('assets/enemy-shield.png')
 PIXI.loader.add('assets/pew.png')
 PIXI.loader.add('assets/pew-puff.png')
 PIXI.loader.add('assets/mine.png')
@@ -560,13 +561,7 @@ function gameloop() {
 
             const ghostSprite = new PIXI.Sprite()
 
-            if (enemy.prefixType === 'horizontal') {
-                ghostSprite.texture = textures.enemies.horizontal.hull
-            } else if (enemy.prefixType === 'sinus') {
-                ghostSprite.texture = textures.enemies.sinus.hull
-            } else if (enemy.prefixType === 'mini-sinus') {
-                ghostSprite.texture = textures.enemies['mini-sinus'].hull
-            }
+            ghostSprite.texture = enemy.texture
 
             ghostSprite.prefixTimer = 40
             ghostSprite.anchor.set(0.5, 0.5)
@@ -613,22 +608,12 @@ function gameloop() {
     		}
 		})
 
-    	if (enemy.prefixShield > 0) {
-            if (enemy.prefixType === 'horizontal') {
-                enemy.texture = textures.enemies.horizontal.shield
-            } else if (enemy.prefixType === 'sinus') {
-                enemy.texture = textures.enemies.sinus.shield    
-            }
-    	} else {
-            if (enemy.prefixType === 'horizontal') {
-    		  enemy.texture = textures.enemies.horizontal.hull
-            } else if (enemy.prefixType === 'sinus') {
-              enemy.texture = textures.enemies.sinus.hull
-            } else if (enemy.prefixType === 'mini-sinus') {
-              enemy.texture = textures.enemies['mini-sinus'].hull
-            }
-    	}
+        if (enemy.prefixShield <= 0 && enemy.prefixShieldSprite) {
+            enemy.removeChild(enemy.prefixShieldSprite)
+            enemy.prefixShieldSprite = null
+        }
 
+        // enemy movement
     	if (enemy.prefixType === 'horizontal') {
     		enemy.position.x = enemy.position.x - 0.075		
     	} else if (enemy.prefixType === 'sinus') {
@@ -730,6 +715,7 @@ function gameloop() {
 
 
 
+    // spawn enemies
     spawnCounter++
 
     if (guiTexts.waveText.prefixTimer > 0 && hasInput) {
@@ -750,17 +736,28 @@ function gameloop() {
     	const rand = Math.random()
     	if (rand < 0.3) {
 	    	enemy.prefixType = 'horizontal'
+            enemy.texture = PIXI.Texture.fromImage('assets/enemy1-hull.png')
 	    	enemy.prefixShield = 20
 	    	enemy.prefixHull = 40
 	    } else if (rand < 0.6) {
 	    	enemy.prefixType = 'sinus'
+            enemy.texture = PIXI.Texture.fromImage('assets/enemy2-hull.png')
 	    	enemy.prefixShield = 5
 	    	enemy.prefixHull = 40
 	    } else {
 	    	enemy.prefixType = 'mini-sinus'
+            enemy.texture = PIXI.Texture.fromImage('assets/enemy3-hull.png')
 	    	enemy.prefixShield = 0
 	    	enemy.prefixHull = 10
 	    }
+
+        if (enemy.prefixShield > 0) {
+            const shieldSprite = new PIXI.Sprite()
+            shieldSprite.texture = PIXI.Texture.fromImage('assets/enemy-shield.png')
+            shieldSprite.anchor.set(0.5, 0.5)
+            enemy.prefixShieldSprite = shieldSprite
+            enemy.addChild(shieldSprite)
+        }
 
 	    enemy.position.x = RENDER_SIZE - 16
 	    enemy.position.y = 80 + Math.floor(Math.random() * 100)
