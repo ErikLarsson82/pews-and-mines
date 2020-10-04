@@ -1,6 +1,6 @@
 
 let textures,
-    pews, pewPuffs, mines, mineBlips, enemies, ghosts, stars, powerups,
+    pewPuffs, mines, mineBlips, enemies, ghosts, stars, powerups,
     logoContainer, p1Sprite, p2Sprite, p1cooldown, p2cooldown,
     enemyKills, playerDeaths, wave,
     counter, spawnCounter, waveCounter, hasInput 
@@ -111,7 +111,6 @@ function startGame() {
 
     hasInput = false
 
-    pews = []
     pewPuffs = []
     mines = []
     mineBlips = []
@@ -260,11 +259,11 @@ function gameloop() {
 	    if (controls.p1.shoot && p1cooldown <= 0) {
             // create pew
 	    	const pewSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/pew.png'))
+            pewSprite.prefixObject = 'pew'
 	    	pewSprite.anchor.set(0.5, 0.5)
 	    	pewSprite.position.x = p1Sprite.position.x + 8
 	    	pewSprite.position.y = p1Sprite.position.y
 	    	stage.addChild(pewSprite)
-	    	pews.push(pewSprite)
 	    	p1cooldown = 8
 	    }
 
@@ -306,7 +305,12 @@ function gameloop() {
 	}
 
     // tick pews ----------------------------------------------------------------------
-    pews.forEach(pew => {
+    stage.children.forEach(child => {
+
+        if (child.prefixObject !== 'pew') return
+
+        const pew = child
+
     	pew.position.x = pew.position.x + 2
 
     	let pewHit = false
@@ -717,7 +721,8 @@ function gameloop() {
 
 
 
-    pews = pews.filter(x => !x.prefixDestroy)
+    stage.children.forEach(child => child.prefixDestroy && stage.removeChild(child))
+
     pewPuffs = pewPuffs.filter(x => !x.prefixDestroy)
     enemies = enemies.filter(x => !x.prefixDestroy)
     mines = mines.filter(x => !x.prefixDestroy)
