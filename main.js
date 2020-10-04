@@ -67,6 +67,8 @@ PIXI.loader.add('assets/enemy2-shield.png')
 PIXI.loader.add('assets/enemy2-hull.png')
 PIXI.loader.add('assets/enemy3-hull.png')
 PIXI.loader.add('assets/enemy-shield.png')
+PIXI.loader.add('assets/enemy-blast.png')
+PIXI.loader.add('assets/enemy-rocket.png')
 PIXI.loader.add('assets/pew.png')
 PIXI.loader.add('assets/pew-puff.png')
 PIXI.loader.add('assets/mine.png')
@@ -249,6 +251,7 @@ function animationLoop() {
             enemy.texture = PIXI.Texture.fromImage('assets/enemy1-hull.png')
 	    	enemy.prefixShield = 20
 	    	enemy.prefixHull = 40
+            enemy.prefixRocketTimer = 40
 	    } else if (rand < 0.6) {
 	    	enemy.prefixType = 'sinus'
             enemy.texture = PIXI.Texture.fromImage('assets/enemy2-hull.png')
@@ -519,7 +522,7 @@ function tickEntities(child) {
                 const dy = mine.position.y - blast.position.y
                 const distance = Math.sqrt(dx * dx + dy * dy)
 
-                if (distance < 48 && mine.prefixActivationTimer === null) {
+                if (distance < blast.width / 2 && mine.prefixActivationTimer === null) {
                     mine.prefixActivationTimer = 60
                     mine.prefixActivationType = blast.prefixType
                 }
@@ -592,7 +595,7 @@ function tickEntities(child) {
                 const distance = Math.sqrt(dx * dx + dy * dy)
 
                 // collision blast - enemy
-                if (distance < 48 + 8) {
+                if (distance < (blast.width + enemy.width) / 2) {
                     if (blast.prefixType === 'shield') {
                         enemy.prefixShield = 0
                     } else if (blast.prefixType === 'hull' && enemy.prefixShield <= 0) {
@@ -607,7 +610,7 @@ function tickEntities(child) {
                 const distance = Math.sqrt(dx * dx + dy * dy)
 
                 // collision blast - players
-                if (distance < 48 + 8) {
+                if (distance < (blast.width + player.width) / 2) {
                     playerDeaths++
 
                     const ghostSprite = new PIXI.Sprite(player === p1Sprite ? textures.p1 : textures.p2)
@@ -699,6 +702,26 @@ function tickEntities(child) {
                 enemy.prefixShieldSprite = null
             }
 
+            if (enemy.prefixRocketTimer !== null) {
+                enemy.prefixRocketTimer -= 1
+                if (enemy.prefixRocketTimer <= 0){
+                    enemy.prefixRocketTimer = 465
+
+                    // create enemy rocket
+                    const rocketSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/enemy-rocket.png'))
+                    rocketSprite.prefixObject = 'rocket'
+                    rocketSprite.anchor.set(0.5, 0.5)
+                    rocketSprite.position.x = enemy.position.x - 8
+                    rocketSprite.position.y = enemy.position.y
+                    rocketSprite.prefixDy = 1
+                    if (rocketSprite.position.y < RENDER_SIZE / 2) {
+                        rocketSprite.prefixDy = -1
+                        rocketSprite.scale.y = -1
+                    }
+                    stage.addChild(rocketSprite)
+                }
+            }
+
             // enemy movement
             if (enemy.prefixType === 'horizontal') {
                 enemy.position.x = enemy.position.x - 0.075     
@@ -759,7 +782,39 @@ function tickEntities(child) {
                     stage.removeChild(powerup)
                 }    
             })
-            break        
+            break    
+
+
+        case 'rocket':
+            const rocket = child
+            
+            const speed = 0.36
+            rocket.position.x -= speed
+            rocket.position.y += rocket.prefixDy * speed
+
+            // collision rocket - player AND
+            // collision rocket - enemies
+            const playersAndEnemies = stage.children.filter(({prefixObject}) => prefixObject === 'p1' || prefixObject === 'p2' || prefixObject === 'enemy')
+            playersAndEnemies.forEach(entity => {
+                const dx = rocket.position.x - entity.position.x
+                const dy = rocket.position.y - entity.position.y
+                const distance = Math.sqrt(dx * dx + dy * dy)
+
+                if (distance < 8) {
+                    const blastSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/enemy-blast.png'))
+                    blastSprite.prefixObject = 'blast'
+                    blastSprite.anchor.set(0.5, 0.5)
+                    blastSprite.prefixType = 'hull'
+                    blastSprite.position.x = rocket.position.x
+                    blastSprite.position.y = rocket.position.y
+                    blastSprite.prefixTimer = 30
+                    stage.addChild(blastSprite)
+                    
+                    rocket.prefixDestroy = true
+                    stage.removeChild(rocket)
+                }
+            })
+            break   
     }
 }
 
