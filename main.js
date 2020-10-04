@@ -431,6 +431,7 @@ function gameloop() {
         })
 
 		if (mine.prefixActivationTimer !== null) {
+            mine.prefixVx = 0
 			if (mine.prefixActivationTimer <= 0) {
 				mine.prefixDestroy = true
 				stage.removeChild(mine)
