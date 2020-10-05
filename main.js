@@ -787,6 +787,12 @@ function tickEntities(child) {
                     stage.removeChild(rocket)
                 }
             })
+
+            if (rocket.position.y > 220 || rocket.position.y < 30) {
+                rocket.prefixDestroy = true
+                stage.removeChild(rocket)
+            }
+            
             break   
 
 
