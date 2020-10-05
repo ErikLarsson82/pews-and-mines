@@ -77,6 +77,7 @@ PIXI.loader.add('assets/blast-hull.png')
 PIXI.loader.add('assets/blast-shield.png')
 PIXI.loader.add('assets/logo.png')
 PIXI.loader.add('assets/powerup.png')
+PIXI.loader.add('assets/companion.png')
 PIXI.loader.load(startGame)
 
 
@@ -750,6 +751,14 @@ function tickEntities(child) {
                 if (isCollision(powerup, player)) {
                     powerup.prefixDestroy = true
                     stage.removeChild(powerup)
+
+                    const companion = new PIXI.Sprite(PIXI.Texture.fromImage('assets/companion.png'))
+                    companion.prefixObject = 'companion'
+                    companion.prefixFollowingPlayer = player
+                    companion.anchor.set(0.5, 0.5)
+                    companion.position.x = player.position.x
+                    companion.position.y = player.position.y
+                    stage.addChild(companion)
                 }    
             })
             break    
@@ -779,9 +788,15 @@ function tickEntities(child) {
                 }
             })
             break   
+
+
+        case 'companion':
+            const companion = child
+            companion.position.x += (companion.prefixFollowingPlayer.position.x - companion.position.x + 25) * 0.02
+            companion.position.y += (companion.prefixFollowingPlayer.position.y - companion.position.y) * 0.02
+            break
     }
 }
-
 
 
 
