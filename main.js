@@ -1,4 +1,6 @@
 
+const { curry } = R
+
 let textures,
     logoContainer, p1Sprite, p2Sprite, p1cooldown, p2cooldown,
     enemyKills, playerDeaths, wave,
@@ -294,14 +296,15 @@ function animationLoop() {
 
 
 
-function isCollision(sprite1, sprite2, optCollisionDistance) {
+const isCollision = curry((sprite1, sprite2) => {
     const dx = sprite2.position.x - sprite1.position.x
     const dy = sprite2.position.y - sprite1.position.y
     const distance = Math.sqrt(dx * dx + dy * dy)
 
-    const collisionDistance = optCollisionDistance || (sprite1.width + sprite2.width) / 2
+    const collisionDistance = (sprite1.width + sprite2.width) / 2
     return distance < collisionDistance
-}
+})
+
 
 
 
@@ -314,10 +317,11 @@ function tickEntities(child) {
 
             let pewHit = false
 
-            stage.children.filter(isEnemy).forEach(enemy => {
-
-                // collision pew - enemy
-                if (isCollision(pew, enemy)) {
+            stage.children
+                .filter(isEnemy)
+                .filter(isCollision(pew))
+                .forEach(enemy => {
+                    // collision pew - enemy
                     pewHit = true
                     if (enemy.prefixShield > 0) {
                         enemy.prefixShield = enemy.prefixShield - 1
@@ -330,8 +334,7 @@ function tickEntities(child) {
                             enemy.position.y += 5
                         }
                     }
-                }   
-            })
+                })
             
             // collision pew - p2
             if (isCollision(pew, p2Sprite)) {
@@ -686,7 +689,7 @@ function tickEntities(child) {
                     const rocketSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/enemy-rocket.png'))
                     rocketSprite.prefixObject = 'rocket'
                     rocketSprite.anchor.set(0.5, 0.5)
-                    rocketSprite.position.x = enemy.position.x - 10
+                    rocketSprite.position.x = enemy.position.x - 14
                     rocketSprite.position.y = enemy.position.y
                     rocketSprite.prefixDy = 1
                     if (rocketSprite.position.y < RENDER_SIZE / 2) {
@@ -773,7 +776,7 @@ function tickEntities(child) {
 
             // collision rocket
             stage.children.filter(isAnything).forEach(entity => {
-                if (isCollision(rocket, entity, (rocket.width / 2 + entity.width) / 2)) {
+                if (isCollision(rocket, entity)) {
                     const blastSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/enemy-blast.png'))
                     blastSprite.prefixObject = 'blast'
                     blastSprite.anchor.set(0.5, 0.5)
