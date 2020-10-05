@@ -134,13 +134,6 @@ function startGame() {
         stage.addChild(star)
     }
 
-    const powerup = new PIXI.Sprite(PIXI.Texture.fromImage('assets/powerup.png'))
-    powerup.prefixObject = 'powerup'
-    powerup.anchor.set(0.5, 0.5)
-    powerup.position.x = 30
-    powerup.position.y = 30
-    stage.addChild(powerup)
-
     const topBorder = new PIXI.Graphics()
     topBorder.beginFill(0x262b44)
     topBorder.drawRect(0, 0, RENDER_SIZE, 18)
@@ -277,6 +270,13 @@ function animationLoop() {
     	waveCounter = 0
         wave++
         guiTexts.waveText.prefixTimer = 180
+
+        const powerup = new PIXI.Sprite(PIXI.Texture.fromImage('assets/powerup.png'))
+        powerup.prefixObject = 'powerup'
+        powerup.anchor.set(0.5, 0.5)
+        powerup.position.x = Math.floor(Math.random() * 200) + 100
+        powerup.position.y = Math.floor(Math.random() * 100) + 100
+        stage.addChild(powerup)
     }
 
     highscore = enemyKills * 1000 - playerDeaths * 5000
