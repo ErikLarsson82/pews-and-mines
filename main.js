@@ -66,6 +66,8 @@ PIXI.loader.add('assets/player-2.png')
 PIXI.loader.add('assets/enemy1-hull.png')
 PIXI.loader.add('assets/enemy2-hull.png')
 PIXI.loader.add('assets/enemy3-hull.png')
+PIXI.loader.add('assets/enemy4-hull.png')
+PIXI.loader.add('assets/enemy5-hull.png')
 PIXI.loader.add('assets/enemy-shield.png')
 PIXI.loader.add('assets/enemy-blast.png')
 PIXI.loader.add('assets/enemy-rocket.png')
@@ -127,6 +129,12 @@ function startGame() {
             },
             'mini-sinus': {
                 hull: PIXI.Texture.fromImage('assets/enemy3-hull.png')
+            },
+            'fodder-hull': {
+                hull: PIXI.Texture.fromImage('assets/enemy4-hull.png')
+            },
+            'fodder-shield': {
+                hull: PIXI.Texture.fromImage('assets/enemy5-hull.png')
             }
         }
     }
@@ -258,7 +266,17 @@ function animationLoop() {
             enemy.texture = PIXI.Texture.fromImage('assets/enemy3-hull.png')
 	    	enemy.prefixShield = 0
 	    	enemy.prefixHull = 10
-	    }
+	    } else if (name === 'fodder-hull') {
+            enemy.prefixType = 'fodder-hull'
+            enemy.texture = PIXI.Texture.fromImage('assets/enemy4-hull.png')
+            enemy.prefixShield = 0
+            enemy.prefixHull = 1
+        } else if (name === 'fodder-shield') {
+            enemy.prefixType = 'fodder-shield'
+            enemy.texture = PIXI.Texture.fromImage('assets/enemy5-hull.png')
+            enemy.prefixShield = 1
+            enemy.prefixHull = 1
+        }
 
         if (enemy.prefixShield > 0) {
             const shieldSprite = new PIXI.Sprite()
@@ -273,10 +291,10 @@ function animationLoop() {
 	    stage.addChild(enemy)
     }
 
-    if (stage.children.filter(isEnemy).length === 0 && hasInput) {
+    if (waveArray.length === 0 && stage.children.filter(isEnemy).length === 0 && hasInput) {
         wave++
 
-        const types = ['horizontal', 'sinus', 'mini-sinus']
+        const types = ['horizontal', 'sinus', 'mini-sinus', 'fodder-hull', 'fodder-shield']
 
         waveArray = []
 
@@ -289,12 +307,14 @@ function animationLoop() {
         allWaves.push([...waveArray])
         guiTexts.waveText.prefixTimer = 180
 
+        /*
         const powerup = new PIXI.Sprite(PIXI.Texture.fromImage('assets/powerup.png'))
         powerup.prefixObject = 'powerup'
         powerup.anchor.set(0.5, 0.5)
         powerup.position.x = Math.floor(Math.random() * 200) + 100
         powerup.position.y = Math.floor(Math.random() * 100) + 100
         stage.addChild(powerup)
+        */
     }
 
     highscore = enemyKills * 1000 - playerDeaths * 5000
@@ -345,6 +365,9 @@ function tickEntities(child) {
                     pewHit = true
                     if (enemy.prefixShield > 0) {
                         enemy.prefixShield = enemy.prefixShield - 1
+                        if (enemy.prefixType.includes('fodder')) {
+                            enemy.prefixHull = 0
+                        }
                     } else {
                         enemy.position.x += 3
 
@@ -729,6 +752,10 @@ function tickEntities(child) {
             } else if (enemy.prefixType === 'mini-sinus') {
                 enemy.position.x = enemy.position.x - 0.2
                 enemy.position.y = enemy.position.y + Math.sin(counter * 10) * 0.7
+            } else if (enemy.prefixType === 'fodder-hull') {
+                enemy.position.x = enemy.position.x - 0.5
+            } else if (enemy.prefixType === 'fodder-shield') {
+                enemy.position.x = enemy.position.x - 0.5
             }
 
             if (enemy.position.y > 220) {
