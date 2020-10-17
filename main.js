@@ -359,6 +359,17 @@ function tickEntities(child) {
 
             let pewHit = false
 
+            stage.children.filter(isRocket).filter(isCollision(pew)).forEach(rocket => {
+                pewHit = true
+                rocket.position.x += 2
+
+                if (pew.position.y > rocket.position.y) {
+                    rocket.position.y -= 3
+                } else {
+                    rocket.position.y += 3
+                }
+            })
+
             stage.children
                 .filter(isEnemy)
                 .filter(isCollision(pew))
@@ -739,6 +750,7 @@ function tickEntities(child) {
                     rocketSprite.position.x = enemy.position.x - 14
                     rocketSprite.position.y = enemy.position.y
                     rocketSprite.prefixDy = 1
+                    rocketSprite.prefixSpeed = 0.36
                     if (rocketSprite.position.y < RENDER_SIZE / 2) {
                         rocketSprite.prefixDy = -1
                         rocketSprite.scale.y = -1
@@ -820,25 +832,33 @@ function tickEntities(child) {
 
         case 'rocket':
             const rocket = child
-            
-            const speed = 0.36
-            rocket.position.x -= speed
-            rocket.position.y += rocket.prefixDy * speed
+
+            rocket.position.x -= rocket.prefixSpeed
+            rocket.position.y += rocket.prefixDy * rocket.prefixSpeed
 
             // collision rocket
-            stage.children.filter(isAnything).forEach(entity => {
-                if (isCollision(rocket, entity)) {
-                    const blastSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/enemy-blast.png'))
-                    blastSprite.prefixObject = 'blast'
-                    blastSprite.anchor.set(0.5, 0.5)
-                    blastSprite.prefixType = 'hull'
-                    blastSprite.position.x = rocket.position.x
-                    blastSprite.position.y = rocket.position.y
-                    blastSprite.prefixTimer = 30
-                    stage.addChild(blastSprite)
+            stage.children.filter(isRocketCollisionFilter).forEach(entity => {
+                if (isCollision(rocket, entity) && rocket !== entity) {
+                    if (isPew(entity) || (isBlast(entity) && entity.prefixType === 'shield')) {
+                        rocket.prefixSpeed = 0.01
+                    } else {
+                        const blastSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/enemy-blast.png'))
+                        blastSprite.prefixObject = 'blast'
+                        blastSprite.anchor.set(0.5, 0.5)
+                        blastSprite.prefixType = 'hull'
+                        blastSprite.position.x = rocket.position.x
+                        blastSprite.position.y = rocket.position.y
+                        blastSprite.prefixTimer = 30
+                        stage.addChild(blastSprite)
 
-                    rocket.prefixDestroy = true
-                    stage.removeChild(rocket)
+                        rocket.prefixDestroy = true
+                        stage.removeChild(rocket)
+
+                        if (isRocket(entity)) {
+                            entity.prefixDestroy = true
+                            stage.removeChild(entity)
+                        }
+                    }
                 }
             })
 
@@ -874,7 +894,7 @@ const isPlayer = ({prefixObject}) => prefixObject === 'p1' || prefixObject === '
 const isPew = ({prefixObject}) => prefixObject === 'pew'
 const isPewPuff = ({prefixObject}) => prefixObject === 'pew-puff'
 const isRocket = ({prefixObject}) => prefixObject === 'rocket'
-const isAnything = ({prefixObject}) => ['p1', 'p2', 'mine', 'pew', 'enemy', 'blast'].includes(prefixObject)
+const isRocketCollisionFilter = ({prefixObject}) => ['p1', 'p2', 'mine', 'pew', 'enemy', 'blast', 'rocket'].includes(prefixObject)
 
 window.addEventListener('keydown', e => {
     hasInput = true
