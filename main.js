@@ -303,6 +303,8 @@ function animationLoop() {
             waveArray.push(shuffleArray(types)[0])
         }
 
+        //waveArray = ['horizontal']
+
         console.log('--- new wave ---', waveArray)
         allWaves.push([...waveArray])
         guiTexts.waveText.prefixTimer = 180
@@ -365,9 +367,6 @@ function tickEntities(child) {
                     pewHit = true
                     if (enemy.prefixShield > 0) {
                         enemy.prefixShield = enemy.prefixShield - 1
-                        if (enemy.prefixType.includes('fodder')) {
-                            enemy.prefixHull = 0
-                        }
                     } else {
                         enemy.position.x += 3
 
@@ -668,6 +667,11 @@ function tickEntities(child) {
 
         case 'enemy':
             const enemy = child
+
+            if (enemy.prefixType === 'fodder-shield' && enemy.prefixShield <= 0) {
+                enemy.prefixHull = 0
+            }
+
             if (enemy.prefixHull <= 0) {
                 enemyKills++
 
