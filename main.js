@@ -3,7 +3,7 @@ const { curry } = R
 
 let textures,
     logoContainer, p1Sprite, p2Sprite, p1cooldown, p2cooldown,
-    enemyKills, playerDeaths, wave,
+    enemyKills, playerDeaths, wave, waveArray, allWaves,
     counter, tick, spawnCounter, waveCounter, hasInput 
 
 const controls = {
@@ -106,6 +106,10 @@ function startGame() {
     highscore = 0
 
     wave = 0
+
+    waveArray = []
+
+    allWaves = []
 
     hasInput = false
 
@@ -228,28 +232,28 @@ function animationLoop() {
     } else {
         guiTexts.waveText.visible = false
     }
-
-    if (spawnCounter > 100 && waveCounter < ENEMIES_PER_WAVE && hasInput) {
-    	waveCounter++
-    	spawnCounter = 0
-
+    
+    if (waveArray.length > 0 && hasInput && spawnCounter > 100) {
+        spawnCounter = 0
+        
     	const enemy = new PIXI.Sprite()
     	enemy.prefixObject = 'enemy'
         enemy.anchor.set(0.5, 0.5)
 
-    	const rand = Math.random()
-    	if (rand < 0.3) {
+        const name = waveArray.shift()
+
+        if (name === 'horizontal') {
 	    	enemy.prefixType = 'horizontal'
             enemy.texture = PIXI.Texture.fromImage('assets/enemy1-hull.png')
 	    	enemy.prefixShield = 20
 	    	enemy.prefixHull = 40
             enemy.prefixRocketTimer = 40
-	    } else if (rand < 0.6) {
+	    } else if (name === 'sinus') {
 	    	enemy.prefixType = 'sinus'
             enemy.texture = PIXI.Texture.fromImage('assets/enemy2-hull.png')
 	    	enemy.prefixShield = 5
 	    	enemy.prefixHull = 40
-	    } else {
+	    } else if (name === 'mini-sinus') {
 	    	enemy.prefixType = 'mini-sinus'
             enemy.texture = PIXI.Texture.fromImage('assets/enemy3-hull.png')
 	    	enemy.prefixShield = 0
@@ -269,9 +273,20 @@ function animationLoop() {
 	    stage.addChild(enemy)
     }
 
-    if (waveCounter >= ENEMIES_PER_WAVE && stage.children.filter(isEnemy).length === 0) {
-    	waveCounter = 0
+    if (stage.children.filter(isEnemy).length === 0 && hasInput) {
         wave++
+
+        const types = ['horizontal', 'sinus', 'mini-sinus']
+
+        waveArray = []
+
+        for (var i = 1; i <= ENEMIES_PER_WAVE; i++) {
+            const r = Math.random()
+            waveArray.push(shuffleArray(types)[0])
+        }
+
+        console.log('--- new wave ---', waveArray)
+        allWaves.push([...waveArray])
         guiTexts.waveText.prefixTimer = 180
 
         const powerup = new PIXI.Sprite(PIXI.Texture.fromImage('assets/powerup.png'))
@@ -292,6 +307,11 @@ function animationLoop() {
     renderer.render(stage)
 }
 
+
+const shuffleArray = arr => arr
+  .map(a => [Math.random(), a])
+  .sort((a, b) => a[0] - b[0])
+  .map(a => a[1]);
 
 
 
