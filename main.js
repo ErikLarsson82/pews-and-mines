@@ -643,8 +643,17 @@ function tickEntities(child) {
                 if (isCollision(blast, enemy)) {
                     if (blast.prefixType === 'shield') {
                         enemy.prefixShield = 0
-                    } else if (blast.prefixType === 'hull' && enemy.prefixShield <= 0) {
-                        enemy.prefixHull = 0
+                    } else if (blast.prefixType === 'hull') {
+                        if (enemy.prefixShield <= 0) {
+                            enemy.prefixHull = 0
+                        } else {
+                            const dx = enemy.position.x - blast.position.x
+                            const dy = enemy.position.y - blast.position.y
+                            const a = Math.atan2(dy,dx)
+                            enemy.position.x += Math.cos(a) * 1 * deltaFactor
+                            enemy.position.y += Math.sin(a) * 1 * deltaFactor
+                        }
+
                     }
                 }           
             })
