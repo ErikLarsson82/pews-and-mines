@@ -34,10 +34,7 @@ const P2_START_X = 12
 const P1_START_Y = RENDER_SIZE / 2
 const P2_START_Y = RENDER_SIZE / 2 + 20
 
-
-
-
-
+let deltaFactor
 
 
 
@@ -50,11 +47,16 @@ const P2_START_Y = RENDER_SIZE / 2 + 20
 const config = {
     antialias: false,
     transparent: false,
-    resolution: 1
+    resolution: 1,
+    sharedTicker: true,
 }
 
-const stage = new PIXI.Container()
+const app = new PIXI.Application(config)
 const renderer = PIXI.autoDetectRenderer(RENDER_SIZE, RENDER_SIZE, config)
+app.renderer = renderer
+
+const stage = app.stage
+
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
 
@@ -217,8 +219,10 @@ function startGame() {
 function animationLoop() {
     requestAnimationFrame(animationLoop)
 
-    tick += 1
-    counter = counter + 0.01
+    deltaFactor = 0.114 * app.ticker.elapsedMS
+
+    tick = Math.floor(tick + 1 * deltaFactor)
+    counter += 0.01 * deltaFactor
 
     if (counter > 120) {
     	counter = 0
@@ -231,10 +235,10 @@ function animationLoop() {
     guiTexts.playerDeathText.text = playerDeaths
     guiTexts.enemyKillText.text = enemyKills
 
-    spawnCounter++
+    spawnCounter += 1 * deltaFactor
 
     if (guiTexts.waveText.prefixTimer > 0 && hasInput) {
-        guiTexts.waveText.prefixTimer--
+        guiTexts.waveText.prefixTimer -= 1 * deltaFactor
         guiTexts.waveText.text = 'WAVE ' + (wave + 1)
         guiTexts.waveText.visible = true
     } else {
@@ -355,18 +359,19 @@ function tickEntities(child) {
         case 'pew':
             const pew = child
 
-            pew.position.x = pew.position.x + 2
+            pew.position.x += 2 * deltaFactor
 
             let pewHit = false
 
             stage.children.filter(isRocket).filter(isCollision(pew)).forEach(rocket => {
                 pewHit = true
-                rocket.position.x += 2
+                rocket.prefixSpeed = 0.01
+                rocket.position.x += 2 * deltaFactor
 
                 if (pew.position.y > rocket.position.y) {
-                    rocket.position.y -= 3
+                    rocket.position.y -= 3 * deltaFactor
                 } else {
-                    rocket.position.y += 3
+                    rocket.position.y += 3 * deltaFactor
                 }
             })
 
@@ -379,12 +384,12 @@ function tickEntities(child) {
                     if (enemy.prefixShield > 0) {
                         enemy.prefixShield = enemy.prefixShield - 1
                     } else {
-                        enemy.position.x += 3
+                        enemy.position.x += 3 * deltaFactor
 
                         if (pew.position.y > enemy.position.y) {
-                            enemy.position.y -= 5
+                            enemy.position.y -= 5 * deltaFactor
                         } else {
-                            enemy.position.y += 5
+                            enemy.position.y += 5 * deltaFactor
                         }
                     }
                 })
@@ -443,7 +448,7 @@ function tickEntities(child) {
         case 'p2':
 
             if (child.prefixGodmode >= 0) {
-                child.prefixGodmode--
+                child.prefixGodmode -= 1 * deltaFactor
                 child.visible = Math.sin(counter * 25) > 0
             } else {
                 child.visible = true    
@@ -468,16 +473,16 @@ function tickEntities(child) {
 
             if (child.prefixObject === 'p1') {
                 if (controls.p1.left) {
-                    p1Sprite.position.x -= 1
+                    p1Sprite.position.x -= 1 * deltaFactor
                 }
                 if (controls.p1.right) {
-                    p1Sprite.position.x += 1
+                    p1Sprite.position.x += 1 * deltaFactor
                 }
                 if (controls.p1.up) {
-                    p1Sprite.position.y -= 1
+                    p1Sprite.position.y -= 1 * deltaFactor
                 }
                 if (controls.p1.down) {
-                    p1Sprite.position.y += 1
+                    p1Sprite.position.y += 1 * deltaFactor
                 }
                 if (controls.p1.shoot && p1cooldown <= 0) {
                     // create pew
@@ -491,20 +496,20 @@ function tickEntities(child) {
                 }
 
                 if (p1cooldown > 0) {
-                    p1cooldown = p1cooldown - 1
+                    p1cooldown -= 1 * deltaFactor
                 }
             } else if (child.prefixObject === 'p2') {
                 if (controls.p2.left) {
-                    p2Sprite.position.x -= 1
+                    p2Sprite.position.x -= 1 * deltaFactor
                 }
                 if (controls.p2.right) {
-                    p2Sprite.position.x += 1
+                    p2Sprite.position.x += 1 * deltaFactor
                 }
                 if (controls.p2.up) {
-                    p2Sprite.position.y -= 1
+                    p2Sprite.position.y -= 1 * deltaFactor
                 }
                 if (controls.p2.down) {
-                    p2Sprite.position.y += 1
+                    p2Sprite.position.y += 1 * deltaFactor
                 }
                 if (controls.p2.shoot && p2cooldown <= 0) {
                     // create mine
@@ -520,14 +525,14 @@ function tickEntities(child) {
                 }
 
                 if (p2cooldown > 0) {
-                    p2cooldown = p2cooldown - 1
+                    p2cooldown -= 1 * deltaFactor
                 }
             }
             break
 
         case 'pew-puff':
             const pewpuff = child
-            pewpuff.prefixTimer--
+            pewpuff.prefixTimer -= 1 * deltaFactor
 
             if (pewpuff.prefixTimer <= 0) {
                 pewpuff.prefixDestroy = true
@@ -538,8 +543,8 @@ function tickEntities(child) {
 
         case 'mine':
             const mine = child
-            mine.position.x += mine.prefixVx
-            mine.prefixVx -= 0.1
+            mine.position.x += mine.prefixVx * deltaFactor
+            mine.prefixVx -= 0.1 * deltaFactor
             if (mine.prefixVx < 0) {
                 mine.prefixVx = 0
             }
@@ -607,7 +612,7 @@ function tickEntities(child) {
                     stage.addChild(blastSprite)
                     
                 } else {
-                    mine.prefixActivationTimer--
+                    mine.prefixActivationTimer -= 1 * deltaFactor
                 }
             }
             break
@@ -615,7 +620,7 @@ function tickEntities(child) {
 
         case 'mine-blip':
             const mineBlip = child
-            mineBlip.prefixTimer--
+            mineBlip.prefixTimer -= 1 * deltaFactor
 
             if (mineBlip.prefixTimer % 8 < 4) {
                 mineBlip.visible = true
@@ -665,9 +670,9 @@ function tickEntities(child) {
                 }
             })
 
-            blast.prefixTimer = blast.prefixTimer - 1
-            blast.position.x += Math.cos(counter * 800)
-            blast.position.y += Math.sin(counter * 800)
+            blast.prefixTimer -= 1 * deltaFactor
+            blast.position.x += Math.cos(counter * 800) * deltaFactor
+            blast.position.y += Math.sin(counter * 800) * deltaFactor
 
             if (blast.prefixTimer <= 0) {
                 blast.prefixDestroy = true
@@ -761,17 +766,17 @@ function tickEntities(child) {
 
             // enemy movement
             if (enemy.prefixType === 'horizontal') {
-                enemy.position.x = enemy.position.x - 0.075     
+                enemy.position.x -= 0.075 * deltaFactor
             } else if (enemy.prefixType === 'sinus') {
-                enemy.position.x = enemy.position.x - 0.075
-                enemy.position.y = enemy.position.y + Math.sin(counter) * 0.4
+                enemy.position.x -= 0.075 * deltaFactor
+                enemy.position.y += Math.sin(counter) * 0.4 * deltaFactor
             } else if (enemy.prefixType === 'mini-sinus') {
-                enemy.position.x = enemy.position.x - 0.2
-                enemy.position.y = enemy.position.y + Math.sin(counter * 10) * 0.7
+                enemy.position.x -= 0.2 * deltaFactor
+                enemy.position.y += Math.sin(counter * 10) * 0.7 * deltaFactor
             } else if (enemy.prefixType === 'fodder-hull') {
-                enemy.position.x = enemy.position.x - 0.5
+                enemy.position.x -= 0.5 * deltaFactor
             } else if (enemy.prefixType === 'fodder-shield') {
-                enemy.position.x = enemy.position.x - 0.5
+                enemy.position.x -= 0.5 * deltaFactor
             }
 
             if (enemy.position.y > 220) {
@@ -787,9 +792,9 @@ function tickEntities(child) {
 
         case 'ghost':
             const ghost = child
-            ghost.prefixTimer--
+            ghost.prefixTimer -= 1 * deltaFactor
 
-            ghost.position.x += Math.sin(counter * 100)
+            ghost.position.x += Math.sin(counter * 100) * deltaFactor
             
             if (ghost.prefixTimer <= 0) {
                 ghost.prefixDestroy = true
@@ -800,7 +805,7 @@ function tickEntities(child) {
 
         case 'star':
             const star = child
-            star.position.x -= 0.1
+            star.position.x -= 0.1 * deltaFactor
 
             if (star.position.x < 0) {
                 star.position.x = RENDER_SIZE
@@ -810,7 +815,7 @@ function tickEntities(child) {
 
         case 'powerup':
             const powerup = child
-            powerup.position.y = powerup.position.y + Math.sin(counter) / 20
+            powerup.position.y = (powerup.position.y + Math.sin(counter) / 20) * deltaFactor
 
             // collision powerup - player
             stage.children.filter(isPlayer).forEach(player => {
@@ -833,13 +838,13 @@ function tickEntities(child) {
         case 'rocket':
             const rocket = child
 
-            rocket.position.x -= rocket.prefixSpeed
-            rocket.position.y += rocket.prefixDy * rocket.prefixSpeed
+            rocket.position.x -= rocket.prefixSpeed * deltaFactor
+            rocket.position.y += rocket.prefixDy * rocket.prefixSpeed * deltaFactor
 
             // collision rocket
             stage.children.filter(isRocketCollisionFilter).forEach(entity => {
-                if (isCollision(rocket, entity) && rocket !== entity) {
-                    if (isPew(entity) || (isBlast(entity) && entity.prefixType === 'shield')) {
+                if (rocket !== entity && isCollision(rocket, entity)) {
+                    if (isBlast(entity) && entity.prefixType === 'shield') {
                         rocket.prefixSpeed = 0.01
                     } else {
                         const blastSprite = new PIXI.Sprite(PIXI.Texture.fromImage('assets/enemy-blast.png'))
@@ -872,8 +877,8 @@ function tickEntities(child) {
 
         case 'companion':
             const companion = child
-            companion.position.x += (companion.prefixFollowingPlayer.position.x - companion.position.x + 25) * 0.02
-            companion.position.y += (companion.prefixFollowingPlayer.position.y - companion.position.y) * 0.02
+            companion.position.x += (companion.prefixFollowingPlayer.position.x - companion.position.x + 25) * 0.02 * deltaFactor
+            companion.position.y += (companion.prefixFollowingPlayer.position.y - companion.position.y) * 0.02 * deltaFactor
             break
     }
 }
@@ -966,4 +971,4 @@ window.addEventListener('keyup', e => {
 	}
 })
 
-document.getElementById('container').appendChild(renderer.view)
+document.getElementById('container').appendChild(app.view)
