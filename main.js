@@ -71,6 +71,7 @@ PIXI.loader.add('assets/enemy3-hull.png')
 PIXI.loader.add('assets/enemy4-hull.png')
 PIXI.loader.add('assets/enemy5-hull.png')
 PIXI.loader.add('assets/enemy-shield.png')
+PIXI.loader.add('assets/enemy-shield-small.png')
 PIXI.loader.add('assets/enemy-blast.png')
 PIXI.loader.add('assets/enemy-rocket.png')
 PIXI.loader.add('assets/pew.png')
@@ -284,7 +285,11 @@ function animationLoop() {
 
         if (enemy.prefixShield > 0) {
             const shieldSprite = new PIXI.Sprite()
-            shieldSprite.texture = PIXI.Texture.fromImage('assets/enemy-shield.png')
+            let shieldTexturePath = 'assets/enemy-shield.png'
+            if (name === 'fodder-shield') {
+                shieldTexturePath = 'assets/enemy-shield-small.png'
+            }
+            shieldSprite.texture = PIXI.Texture.fromImage(shieldTexturePath)
             shieldSprite.anchor.set(0.5, 0.5)
             enemy.prefixShieldSprite = shieldSprite
             enemy.addChild(shieldSprite)
