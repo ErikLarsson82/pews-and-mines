@@ -74,8 +74,10 @@ PIXI.loader.add('assets/enemy-shield.png')
 PIXI.loader.add('assets/enemy-shield-small.png')
 PIXI.loader.add('assets/enemy-blast.png')
 PIXI.loader.add('assets/enemy-rocket.png')
+PIXI.loader.add('assets/enemy-rocket-stopped.png')
 PIXI.loader.add('assets/pew.png')
 PIXI.loader.add('assets/pew-puff.png')
+PIXI.loader.add('assets/stun-effect.png')
 PIXI.loader.add('assets/mine.png')
 PIXI.loader.add('assets/mine-trig-hull.png')
 PIXI.loader.add('assets/mine-trig-shield.png')
@@ -357,6 +359,18 @@ const isCollision = curry((sprite1, sprite2) => {
 })
 
 
+const createStunEffect = (followEntity) => {
+    const stunEffect = new PIXI.Sprite(PIXI.Texture.fromImage('assets/stun-effect.png'))
+    stunEffect.prefixObject = 'stun-effect'
+    stunEffect.prefixTimer = 18
+    stunEffect.anchor.set(0.5, 0.5)
+    stunEffect.prefixFollowEntity = followEntity
+    stunEffect.position.x = followEntity.position.x
+    stunEffect.position.y = followEntity.position.y
+    stage.addChild(stunEffect)
+}
+
+
 
 
 function tickEntities(child) {
@@ -370,7 +384,13 @@ function tickEntities(child) {
 
             stage.children.filter(isRocket).filter(isCollision(pew)).forEach(rocket => {
                 pewHit = true
+
+                if (rocket.prefixSpeed !== 0.01) {
+                    createStunEffect(rocket)
+                }
+
                 rocket.prefixSpeed = 0.01
+                rocket.texture = PIXI.Texture.fromImage('assets/enemy-rocket-stopped.png')
                 rocket.position.x += 2 * deltaFactor
 
                 if (pew.position.y > rocket.position.y) {
@@ -535,6 +555,18 @@ function tickEntities(child) {
             }
             break
 
+        case 'stun-effect':
+            const stunEffect = child
+            stunEffect.prefixTimer -= 1 * deltaFactor
+            stunEffect.position.x = stunEffect.prefixFollowEntity.position.x
+            stunEffect.position.y = stunEffect.prefixFollowEntity.position.y
+
+            if (stunEffect.prefixTimer <= 0) {
+                stunEffect.prefixDestroy = true
+                stage.removeChild(stunEffect)
+            }
+            break
+
         case 'pew-puff':
             const pewpuff = child
             pewpuff.prefixTimer -= 1 * deltaFactor
@@ -648,6 +680,7 @@ function tickEntities(child) {
                 if (isCollision(blast, enemy)) {
                     if (blast.prefixType === 'shield') {
                         enemy.prefixShield = 0
+                        createStunEffect(enemy)
                     } else if (blast.prefixType === 'hull') {
                         if (enemy.prefixShield <= 0) {
                             enemy.prefixHull = 0
@@ -755,6 +788,7 @@ function tickEntities(child) {
             if (enemy.prefixShield <= 0 && enemy.prefixShieldSprite) {
                 enemy.removeChild(enemy.prefixShieldSprite)
                 enemy.prefixShieldSprite = null
+                createStunEffect(enemy)
             }
 
             if (enemy.prefixRocketTimer !== null) {
@@ -912,6 +946,7 @@ const isBlast = ({prefixObject}) => prefixObject === 'blast'
 const isPlayer = ({prefixObject}) => prefixObject === 'p1' || prefixObject === 'p2'
 const isPew = ({prefixObject}) => prefixObject === 'pew'
 const isPewPuff = ({prefixObject}) => prefixObject === 'pew-puff'
+const isStunEffect = ({prefixObject}) => prefixObject === 'stun-effect'
 const isRocket = ({prefixObject}) => prefixObject === 'rocket'
 const isRocketCollisionFilter = ({prefixObject}) => ['p1', 'p2', 'mine', 'pew', 'enemy', 'blast', 'rocket'].includes(prefixObject)
 
